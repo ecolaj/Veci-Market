@@ -114,7 +114,12 @@ export default function Inbox() {
                   <p><span className="text-neutral-400 font-bold">Nombre:</span> <span className="font-medium">{otherUser?.display_name}</span></p>
                   <p><span className="text-neutral-400 font-bold">Contacto:</span> <span className="font-medium">{otherUser?.phone || otherUser?.email}</span></p>
                   {activeTab === 'sales' && (
-                    <p><span className="text-neutral-400 font-bold">Entrega en:</span> <span className="font-medium">{order.delivery_address}</span></p>
+                    <>
+                      <p><span className="text-neutral-400 font-bold">Entrega en:</span> <span className="font-medium">{order.delivery_address}</span></p>
+                      {order.notes && (
+                        <p><span className="text-neutral-400 font-bold">Notas/Observaciones:</span> <span className="font-medium">{order.notes}</span></p>
+                      )}
+                    </>
                   )}
                   
                   {order.status === 'cancelled' && order.cancel_reason && (

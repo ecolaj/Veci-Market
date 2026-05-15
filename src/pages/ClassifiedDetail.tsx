@@ -16,7 +16,7 @@ export default function ClassifiedDetail() {
   const { isAuthenticated, user } = useAuthStore();
   
   const [isOrdering, setIsOrdering] = useState(false);
-  const [address, setAddress] = useState('');
+  const [notes, setNotes] = useState('');
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
@@ -40,6 +40,7 @@ export default function ClassifiedDetail() {
   }, [viewerOpen, item]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
@@ -63,7 +64,8 @@ export default function ClassifiedDetail() {
       classified_id: item.id,
       buyer_id: user.id,
       vendor_id: item.vendor_id,
-      delivery_address: address || user.sector,
+      delivery_address: `${user.sector} - Casa/Apto: ${user.house_number || 'N/A'}`,
+      notes: notes,
     });
     
     setOrderSuccess(true);
@@ -233,13 +235,12 @@ export default function ClassifiedDetail() {
                  <form onSubmit={handleOrder} className="bg-neutral-50 p-4 rounded-xl border border-neutral-200">
                     <h4 className="font-bold mb-3">Confirma tu pedido</h4>
                     <div className="mb-3">
-                      <label className="block text-xs font-medium text-neutral-600 mb-1">Dirección de entrega / Detalles</label>
+                      <label className="block text-xs font-medium text-neutral-600 mb-1">Notas/Observaciones</label>
                       <textarea 
-                        value={address}
-                        onChange={e => setAddress(e.target.value)}
-                        placeholder="Ej. Casa 45, junto al parque..."
+                        value={notes}
+                        onChange={e => setNotes(e.target.value)}
+                        placeholder="Ej. Entregar después de las 8 pm, pago exacto..."
                         className="w-full p-2 border border-neutral-300 rounded-lg text-sm"
-                        required
                         rows={2}
                       />
                     </div>

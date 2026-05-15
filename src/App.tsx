@@ -1,9 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Outlet, Link, NavLink, useNavigate } from 'react-router-dom';
-import { Home as HomeIcon, Search as SearchIcon, User, Bell, Menu, LayoutDashboard, Plus, Settings, Package } from 'lucide-react';
+import { Home as HomeIcon, Search as SearchIcon, User, Bell, Menu, LayoutDashboard, Plus, Settings, Package, Info } from 'lucide-react';
 import { useAuthStore, useAppStore } from './store';
 import { cn } from './lib/utils';
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { requestNotificationPermission } from './lib/firebase';
 
 import HomePage from './pages/Home';
 import SearchPage from './pages/Search';
@@ -27,6 +28,18 @@ import PWAPrompt from './components/PWAPrompt';
 function Layout() {
   const { isAuthenticated, user } = useAuthStore();
   const orders = useAppStore(state => state.orders);
+  const location = useLocation();
+  const [notificationPerm, setNotificationPerm] = useState<NotificationPermission>(
+    'Notification' in window ? Notification.permission : 'denied'
+  );
+
+  const requestPerm = async () => {
+    const perm = await Notification.requestPermission();
+    setNotificationPerm(perm);
+    if (perm === 'granted') {
+      await requestNotificationPermission();
+    }
+  };
   
   // Count pending orders for vendor
   const pendingOrders = orders.filter(o => o.vendor_id === user?.id && o.status === 'pending').length;
@@ -82,8 +95,36 @@ function Layout() {
 
       {/* Pending Orders Notification Banner */}
       <AnimatePresence>
+        {isAuthenticated && notificationPerm === 'default' && (
+          <div className="fixed top-24 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none mb-2">
+            <motion.div
+              initial={{ y: -100, opacity: 0, scale: 0.95 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: -100, opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="bg-indigo-500/95 backdrop-blur-md border border-indigo-500/50 px-5 py-4 rounded-[20px] shadow-2xl flex items-center justify-between text-white w-full max-w-md pointer-events-auto"
+            >
+              <div className="flex items-center gap-3 font-medium text-sm">
+                <div className="bg-white/20 p-2 rounded-full shrink-0">
+                  <Bell className="w-5 h-5 text-white" />
+                </div>
+                <div className="text-left flex-1">
+                  <span className="block leading-tight text-white/90">
+                    Activa las <strong>Notificaciones</strong> para no perder ningún detalle de tus pedidos.
+                  </span>
+                </div>
+              </div>
+              <button onClick={requestPerm} className="text-xs font-black bg-white hover:bg-neutral-100 text-indigo-600 px-4 py-2.5 rounded-xl transition-transform hover:scale-105 shrink-0 shadow-sm ml-4">
+                Activar
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {isAuthenticated && pendingOrders > 0 && (
-          <div className="fixed top-24 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+          <div className={`fixed ${notificationPerm === 'default' ? 'top-48' : 'top-24'} left-0 right-0 z-50 flex justify-center px-4 pointer-events-none`}>
             <motion.div
               initial={{ y: -100, opacity: 0, scale: 0.95 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}

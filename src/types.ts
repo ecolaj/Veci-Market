@@ -46,6 +46,7 @@ export interface Order {
   created_at: string;
   updated_at: string;
   delivery_address: string;
+  notes?: string;
 }
 
 export interface Review {

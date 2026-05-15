@@ -1,0 +1,6 @@
+{
+  "name": "Mercado Vecinal",
+  "description": "Un portal comunitario para vecinos donde pueden consultar, publicar y comprar productos o servicios. Incluye notificaciones, pedidos, y estadísticas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

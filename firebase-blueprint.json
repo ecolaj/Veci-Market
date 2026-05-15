@@ -1,0 +1,107 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile document",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "display_name": { "type": "string" },
+        "avatar_url": { "type": "string" },
+        "sector": { "type": "string" },
+        "house_number": { "type": "string" },
+        "phone": { "type": "string" },
+        "secondary_phone": { "type": "string" },
+        "role": { "type": "string", "enum": ["buyer", "vendor"] },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "display_name", "role", "created_at"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Product category",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "icon_name": { "type": "string" },
+        "color": { "type": "string" }
+      },
+      "required": ["name", "icon_name", "color"]
+    },
+    "Classified": {
+      "title": "Classified",
+      "description": "A product or service listing",
+      "type": "object",
+      "properties": {
+        "vendor_id": { "type": "string" },
+        "category_id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "payment_methods": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "image_url": { "type": "string" },
+        "images": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "created_at": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "inactive"] }
+      },
+      "required": ["vendor_id", "category_id", "title", "description", "price", "created_at", "status"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "A purchase order between a buyer and vendor",
+      "type": "object",
+      "properties": {
+        "classified_id": { "type": "string" },
+        "buyer_id": { "type": "string" },
+        "vendor_id": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "delivered", "cancelled"] },
+        "cancel_reason": { "type": "string" },
+        "created_at": { "type": "string" },
+        "updated_at": { "type": "string" },
+        "delivery_address": { "type": "string" }
+      },
+      "required": ["classified_id", "buyer_id", "vendor_id", "status", "created_at", "updated_at", "delivery_address"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "A review for a classified left by a buyer",
+      "type": "object",
+      "properties": {
+        "classified_id": { "type": "string" },
+        "user_id": { "type": "string" },
+        "rating": { "type": "number" },
+        "comment": { "type": "string" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["classified_id", "user_id", "rating", "comment", "created_at"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles. ID matches Firebase auth UID."
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "List of categories"
+    },
+    "/classifieds/{classifiedId}": {
+      "schema": { "$ref": "#/entities/Classified" },
+      "description": "All classified listings."
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Purchase orders."
+    },
+    "/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Product reviews."
+    }
+  }
+}

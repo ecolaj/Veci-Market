@@ -1,0 +1,172 @@
+import { useAuthStore } from '../../store';
+import { services } from '../../lib/services';
+import { LogOut, User, Shield, BookOpen, ChevronRight, AlertTriangle, X, Bell } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import ThemeToggle from '../../components/ThemeToggle';
+import { requestNotificationPermission } from '../../lib/firebase';
+
+export default function Settings() {
+  const { user } = useAuthStore();
+  const navigate = useNavigate();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const handleTestNotification = async () => {
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      await requestNotificationPermission();
+      
+      if (navigator.vibrate) {
+        navigator.vibrate([200, 100, 200]);
+      }
+
+      new Notification("Notificaciones activas", {
+        body: "Así recibirás avisos de nuevos mensajes y pedidos.",
+        icon: "/icon.svg",
+        vibrate: [200, 100, 200]
+      });
+      alert("Notificaciones habilitadas. Revisa si llegó la notificación de prueba.");
+    } else {
+      alert("Debes permitir las notificaciones en tu navegador/móvil.");
+    }
+  };
+
+  const handleLogout = async () => {
+    await services.signOut();
+  };
+
+  if (!user) return null;
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-6">
+      <h1 className="text-2xl font-black text-neutral-800">Ajustes</h1>
+
+      <div className="bg-white rounded-[32px] overflow-hidden border border-neutral-100 shadow-sm">
+        <div 
+          onClick={() => navigate('/dashboard/profile')}
+          className="flex items-center justify-between p-6 hover:bg-neutral-50 cursor-pointer transition-colors border-b border-neutral-100"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+              <User className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-neutral-800">Ajustes de Perfil</h3>
+              <p className="text-xs text-neutral-500">Actualiza tu información y avatar</p>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-neutral-400" />
+        </div>
+
+        <ThemeToggle />
+
+        {/* Notifications Test */}
+        <div 
+          className="flex items-center justify-between p-6 hover:bg-neutral-50 cursor-pointer transition-colors border-b border-neutral-100"
+          onClick={handleTestNotification}
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center">
+              <Bell className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-neutral-800">Notificaciones</h3>
+              <p className="text-xs text-neutral-500">Activar y probar avisos / vibración</p>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-neutral-400" />
+        </div>
+
+        {/* Manual */}
+        <div 
+          className="flex items-center justify-between p-6 hover:bg-neutral-50 cursor-pointer transition-colors border-b border-neutral-100"
+          onClick={() => navigate("/manual")}
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+              <BookOpen className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-neutral-800">Manual de Usuario</h3>
+              <p className="text-xs text-neutral-500">Guía de cómo usar VeciMarket</p>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-neutral-400" />
+        </div>
+
+        {/* Privacy Policy */}
+        <div 
+          className="flex items-center justify-between p-6 hover:bg-neutral-50 cursor-pointer transition-colors border-b border-neutral-100"
+          onClick={() => navigate("/privacy")}
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
+              <Shield className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-neutral-800">Política de Privacidad</h3>
+              <p className="text-xs text-neutral-500">Términos y condiciones</p>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-neutral-400" />
+        </div>
+
+        {/* Logout */}
+        <div 
+          onClick={() => setShowLogoutModal(true)}
+          className="flex items-center justify-between p-6 hover:bg-red-50 cursor-pointer transition-colors"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+              <LogOut className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-red-600">Cerrar Sesión</h3>
+              <p className="text-xs text-red-400">Salir de tu cuenta</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Logout Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-[32px] p-8 max-w-sm w-full shadow-2xl relative animate-in fade-in zoom-in duration-200">
+            <button 
+              onClick={() => setShowLogoutModal(false)}
+              className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600 transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <div className="flex flex-col items-center text-center mb-6">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-red-100 text-red-500">
+                <AlertTriangle className="w-8 h-8" />
+              </div>
+              <h3 className="text-2xl font-black text-neutral-800">
+                ¿Cerrar Sesión?
+              </h3>
+              <p className="text-neutral-500 mt-2 font-medium">
+                Tendrás que volver a ingresar tus credenciales para acceder a VeciMarket.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 py-3 px-4 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold rounded-2xl transition-colors"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={handleLogout}
+                className="flex-1 py-3 px-4 font-black text-white rounded-2xl shadow-md transition-transform hover:scale-[1.02] bg-red-500 hover:bg-red-600"
+              >
+                Sí, Salir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

@@ -72,7 +72,7 @@ export default function Home() {
           <Link to="/search" className="bg-white px-4 py-2 rounded-xl text-sm font-bold border border-neutral-100 shadow-sm hover:border-neutral-200 transition-colors text-neutral-600">Ver todo</Link>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
           {recommendedClassifieds.map(item => {
             const vendor = users.find(u => u.id === item.vendor_id);
             const category = categories.find(c => c.id === item.category_id);
@@ -83,10 +83,10 @@ export default function Home() {
               <Link 
                 key={item.id} 
                 to={`/classified/${item.id}`}
-                className="group flex flex-col bg-white rounded-[32px] p-5 shadow-sm border border-neutral-100 hover:border-emerald-200 transition-colors cursor-pointer"
+                className="group flex flex-col bg-white rounded-[24px] sm:rounded-[32px] p-3 sm:p-5 shadow-sm border border-neutral-100 hover:border-emerald-200 transition-colors cursor-pointer"
               >
-                <div className="relative h-44 bg-neutral-100 rounded-2xl mb-4 overflow-hidden">
-                  <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-black text-emerald-600 shadow-sm z-10">{formatPrice(item.price)}</div>
+                <div className="relative h-32 sm:h-44 bg-neutral-100 rounded-[16px] sm:rounded-2xl mb-3 sm:mb-4 overflow-hidden">
+                  <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white/90 backdrop-blur-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-black text-emerald-600 shadow-sm z-10">{formatPrice(item.price)}</div>
                   {(item.images?.[0] || item.image_url) ? (
                     <img 
                       src={item.images?.[0] || item.image_url} 
@@ -107,16 +107,16 @@ export default function Home() {
                 </div>
                 
                 <div className="flex flex-col flex-1">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-black text-lg text-neutral-800 group-hover:text-emerald-500 transition-colors leading-tight line-clamp-2">
+                  <div className="flex justify-between items-start mb-1 sm:mb-2 flex-col sm:flex-row">
+                    <h4 className="font-black text-sm sm:text-lg text-neutral-800 group-hover:text-emerald-500 transition-colors leading-tight line-clamp-2">
                       {item.title}
                     </h4>
-                    <span className="text-[10px] text-neutral-400 font-bold uppercase mt-1 shrink-0 ml-2">
+                    <span className="text-[9px] sm:text-[10px] text-neutral-400 font-bold uppercase mt-1 shrink-0 sm:ml-2">
                       {formatDistanceToNow(new Date(item.created_at), { locale: es })}
                     </span>
                   </div>
                   
-                  <p className="text-neutral-500 text-sm line-clamp-2 mb-4 flex-1">
+                  <p className="text-neutral-500 text-xs sm:text-sm line-clamp-2 mb-2 sm:mb-4 flex-1">
                     {item.description}
                   </p>
                   
@@ -129,22 +129,22 @@ export default function Home() {
                   )}
                   
                   <div 
-                    className="flex items-center gap-3 pt-4 border-t border-neutral-50"
+                    className="flex items-center gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-neutral-50 mt-auto"
                     onClick={(e) => {
                       e.preventDefault();
                       navigate(`/user/${vendor?.id}`);
                     }}
                   >
                      {vendor?.avatar_url ? (
-                        <img src={vendor.avatar_url} alt="Profile" className="w-8 h-8 rounded-full border border-neutral-200 object-cover" referrerPolicy="no-referrer" />
+                        <img src={vendor.avatar_url} alt="Profile" className="w-6 h-6 sm:w-8 sm:h-8 rounded-full border border-neutral-200 object-cover" referrerPolicy="no-referrer" />
                       ) : (
-                        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-xs">
+                        <div className="w-6 h-6 sm:w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-[10px] sm:text-xs">
                           {vendor?.display_name?.charAt(0).toUpperCase()}
                         </div>
                       )}
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold text-neutral-800 hover:text-emerald-600 transition-colors cursor-pointer">{vendor?.display_name}</span>
-                      <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider truncate max-w-[150px]">{vendor?.sector}</span>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[10px] sm:text-xs font-bold text-neutral-800 hover:text-emerald-600 transition-colors cursor-pointer truncate">{vendor?.display_name}</span>
+                      <span className="text-[8px] sm:text-[10px] text-neutral-400 font-bold uppercase tracking-wider truncate pb-[1px]">{vendor?.sector}</span>
                     </div>
                   </div>
                 </div>

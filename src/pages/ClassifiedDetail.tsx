@@ -40,10 +40,13 @@ export default function ClassifiedDetail() {
   }, [viewerOpen, item]);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]);
 
   if (!item) {
     return <div className="text-center py-20 text-neutral-500">Clasificado no encontrado</div>;

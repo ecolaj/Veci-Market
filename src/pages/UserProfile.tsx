@@ -69,17 +69,17 @@ export default function UserProfile() {
           <p className="text-neutral-500 font-medium">Este usuario no tiene anuncios publicados en este momento.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
           {userClassifieds.map(item => {
             const category = categories.find(c => c.id === item.category_id);
             return (
               <Link 
                 key={item.id} 
                 to={`/classified/${item.id}`}
-                className="group flex flex-col bg-white rounded-[32px] p-5 shadow-sm border border-neutral-100 hover:border-emerald-200 transition-colors cursor-pointer"
+                className="group flex flex-col bg-white rounded-[24px] sm:rounded-[32px] p-3 sm:p-5 shadow-sm border border-neutral-100 hover:border-emerald-200 transition-colors cursor-pointer"
               >
-                <div className="relative h-44 bg-neutral-100 rounded-2xl mb-4 overflow-hidden">
-                   <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-black text-emerald-600 shadow-sm z-10">{formatPrice(item.price)}</div>
+                <div className="relative h-32 sm:h-44 bg-neutral-100 rounded-[16px] sm:rounded-2xl mb-3 sm:mb-4 overflow-hidden">
+                   <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white/90 backdrop-blur-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-black text-emerald-600 shadow-sm z-10">{formatPrice(item.price)}</div>
                   {(item.images?.[0] || item.image_url) ? (
                     <img 
                       src={item.images?.[0] || item.image_url} 
@@ -100,16 +100,16 @@ export default function UserProfile() {
                 </div>
                 
                 <div className="flex flex-col flex-1">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-black text-lg text-neutral-800 group-hover:text-emerald-500 transition-colors leading-tight line-clamp-2">
+                  <div className="flex justify-between items-start mb-1 sm:mb-2 flex-col sm:flex-row">
+                    <h4 className="font-black text-sm sm:text-lg text-neutral-800 group-hover:text-emerald-500 transition-colors leading-tight line-clamp-2">
                       {item.title}
                     </h4>
-                    <span className="text-[10px] text-neutral-400 font-bold uppercase mt-1 shrink-0 ml-2">
+                    <span className="text-[9px] sm:text-[10px] text-neutral-400 font-bold uppercase mt-1 shrink-0 sm:ml-2">
                       {formatDistanceToNow(new Date(item.created_at), { locale: es })}
                     </span>
                   </div>
                   
-                  <p className="text-neutral-500 text-sm line-clamp-2 flex-1">
+                  <p className="text-neutral-500 text-xs sm:text-sm line-clamp-2 flex-1">
                     {item.description}
                   </p>
                 </div>

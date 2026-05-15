@@ -50,32 +50,32 @@ export default function MyClassifieds() {
             <button onClick={() => navigate('/publish')} className="mt-4 text-emerald-600 font-bold hover:underline">¡Publica tu primero anuncio!</button>
          </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
           {myClassifieds.map(item => (
-            <div key={item.id} className="bg-white rounded-[32px] p-5 shadow-sm border border-neutral-100 flex flex-col hover:border-emerald-200 transition-colors">
-              <div className="relative h-40 bg-neutral-100 rounded-2xl mb-4 overflow-hidden">
+            <div key={item.id} className="bg-white rounded-[24px] sm:rounded-[32px] p-3 sm:p-5 shadow-sm border border-neutral-100 flex flex-col hover:border-emerald-200 transition-colors">
+              <div className="relative h-32 sm:h-40 bg-neutral-100 rounded-[16px] sm:rounded-2xl mb-3 sm:mb-4 overflow-hidden">
                 {(item.images?.[0] || item.image_url) ? (
                   <img src={item.images?.[0] || item.image_url} className="w-full h-full object-cover group-hover:scale-105 transition-transform" referrerPolicy="no-referrer" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-neutral-300"><Store className="w-10 h-10" /></div>
                 )}
-                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-black text-emerald-600 shadow-sm z-10">{formatPrice(item.price)}</div>
+                <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white/90 backdrop-blur-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-black text-emerald-600 shadow-sm z-10">{formatPrice(item.price)}</div>
               </div>
-              <h3 className="font-black text-lg leading-tight line-clamp-1 mb-1 text-neutral-800">{item.title}</h3>
-              <p className="text-xs text-neutral-400 font-bold uppercase mb-4 flex-1">
+              <h3 className="font-black text-sm sm:text-lg leading-tight line-clamp-2 sm:line-clamp-1 mb-1 text-neutral-800">{item.title}</h3>
+              <p className="text-[10px] sm:text-xs text-neutral-400 font-bold uppercase mb-3 sm:mb-4 flex-1">
                 {formatDistanceToNow(new Date(item.created_at), {locale: es})}
               </p>
-              <div className="flex gap-2 pt-3 border-t border-neutral-50">
+              <div className="flex gap-2 pt-2 sm:pt-3 border-t border-neutral-50 flex-col sm:flex-row">
                 <button 
                   onClick={() => navigate(`/publish?edit=${item.id}`)}
-                  className="px-3 py-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors font-bold text-xs flex items-center gap-1 border border-neutral-100 hover:border-emerald-200"
+                  className="px-2 py-1.5 sm:px-3 sm:py-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors font-bold text-[10px] sm:text-xs flex items-center justify-center sm:justify-start gap-1 border border-neutral-100 hover:border-emerald-200"
                   title="Editar"
                 >
                   <Edit2 className="w-3 h-3" /> Editar
                 </button>
                 <button 
                   onClick={() => setConfirmModal({ isOpen: true, type: 'delete', id: item.id })}
-                  className="px-3 py-2 text-red-500 hover:bg-red-50 rounded-xl transition-colors font-bold text-xs flex items-center gap-1 border border-neutral-100 hover:border-red-200 ml-auto"
+                  className="px-2 py-1.5 sm:px-3 sm:py-2 text-red-500 hover:bg-red-50 rounded-xl transition-colors font-bold text-[10px] sm:text-xs flex items-center justify-center sm:justify-start gap-1 border border-neutral-100 hover:border-red-200 sm:ml-auto"
                   title="Eliminar"
                 >
                   <Trash2 className="w-3 h-3" /> Eliminar

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Outlet, Link, NavLink, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet, Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Home as HomeIcon, Search as SearchIcon, User, Bell, Menu, LayoutDashboard, Plus, Settings, Package, Info } from 'lucide-react';
 import { useAuthStore, useAppStore } from './store';
 import { cn } from './lib/utils';
@@ -159,7 +159,7 @@ function Layout() {
 
       {/* Mobile Bottom Nav */}
       <nav className="sm:hidden fixed bottom-0 w-full bg-white border-t border-neutral-200 pb-safe z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-        <div className="grid grid-cols-5 items-center h-16 relative">
+        <div className={cn("grid items-center h-16 relative", isAuthenticated ? "grid-cols-5" : "grid-cols-3")}>
           <NavLink to="/" end className={({ isActive }) => cn("flex flex-col flex-1 items-center gap-1 p-2 transition-colors w-full", isActive ? "text-emerald-600 relative after:absolute after:bottom-0 after:w-8 after:h-1 after:bg-emerald-500 after:rounded-t-md" : "text-neutral-500 hover:text-emerald-500")}>
             <HomeIcon className="w-5 h-5" />
             <span className="text-[10px] font-bold">Inicio</span>

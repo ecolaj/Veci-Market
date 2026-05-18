@@ -12,21 +12,29 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-messaging.onBackgroundMessage((payload) => {
-  console.log('[firebase-messaging-sw.js] Received background message ', payload);
-  
-  // Customize notification here if needed, but if 'notification' payload is sent from the server,
-  // FCM will automatically display it. If we use data-only payload, we can display it manually:
-  
-  const notificationTitle = payload.notification?.title || payload.data?.title || 'Nueva Notificación';
-  const notificationOptions = {
-    body: payload.notification?.body || payload.data?.body,
-    icon: '/pwa-192x192.png',
-    data: payload.data || {}
-  };
+// Important for iOS: Intercept raw push event to guarantee notification is shown.
+// Apple's Web Push implementation can drop background messages if not handled synchronously here.
+self.addEventListener('push', function(event) {
+  let payload;
+  try {
+    payload = event.data?.json();
+  } catch (e) {
+    console.error('Failed to parse push payload', e);
+  }
 
-  // self.registration.showNotification(notificationTitle, notificationOptions);
-  // Note: if you send purely a "notification" payload, Firebase automatically shows it.
+  // If payload exists, we force show.
+  if (payload) {
+    const title = payload.notification?.title || payload.data?.title || 'Nueva Notificación';
+    const options = {
+      body: payload.notification?.body || payload.data?.body || '',
+      icon: payload.notification?.icon || '/icon.svg',
+      data: payload.data || {},
+      vibrate: [200, 100, 200]
+    };
+
+    const promiseChain = self.registration.showNotification(title, options);
+    event.waitUntil(promiseChain);
+  }
 });
 
 self.addEventListener('notificationclick', function(event) {

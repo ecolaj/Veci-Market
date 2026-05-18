@@ -69,6 +69,9 @@ async function startServer() {
         data: data || {},
         tokens: tokens,
         webpush: {
+          headers: {
+            Urgency: "high"
+          },
           notification: {
             title: title || "Nueva Notificación",
             body: body || "",

@@ -1,33 +1,66 @@
 import { useAuthStore } from '../../store';
 import { services } from '../../lib/services';
-import { LogOut, User, Shield, BookOpen, ChevronRight, AlertTriangle, X, Bell } from 'lucide-react';
+import { LogOut, User, Shield, BookOpen, ChevronRight, AlertTriangle, X, Bell, BellOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ThemeToggle from '../../components/ThemeToggle';
 import { requestNotificationPermission } from '../../lib/firebase';
+import { cn } from '../../lib/utils';
 
 export default function Settings() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [notificationPerm, setNotificationPerm] = useState<NotificationPermission>(
+    'Notification' in window ? Notification.permission : 'denied'
+  );
 
-  const handleTestNotification = async () => {
+  useEffect(() => {
+    if ('Notification' in window) {
+      setNotificationPerm(Notification.permission);
+    }
+  }, []);
+
+  const handleToggleNotification = async () => {
+    if (!('Notification' in window)) {
+      alert("Tu navegador no soporta notificaciones.");
+      return;
+    }
+
+    if (notificationPerm === 'granted') {
+      alert("Las notificaciones ya están activas. Para desactivarlas o cambiar el comportamiento en segundo plano, por favor ajusta los permisos desde la configuración de tu navegador o dispositivo.");
+      // Optional: attempt a test push to prove they work
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+      new Notification("Notificaciones activas", {
+        body: "Así lucirán los avisos de nuevos pedidos y mensajes.",
+        icon: "/icon.svg"
+      });
+      return;
+    }
+
     const permission = await Notification.requestPermission();
+    setNotificationPerm(permission);
+    
     if (permission === 'granted') {
-      await requestNotificationPermission();
-      
+      await requestNotificationPermission(user?.id);
       if (navigator.vibrate) {
         navigator.vibrate([200, 100, 200]);
       }
-
-      new Notification("Notificaciones activas", {
-        body: "Así recibirás avisos de nuevos mensajes y pedidos.",
-        icon: "/icon.svg",
-        vibrate: [200, 100, 200]
-      });
-      alert("Notificaciones habilitadas. Revisa si llegó la notificación de prueba.");
+      if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+        navigator.serviceWorker.ready.then(registration => {
+          registration.showNotification("Notificaciones activas", {
+            body: "¡Listo! Recibirás notificaciones mientras uses la app.",
+            icon: "/icon.svg"
+          } as any);
+        });
+      } else {
+        new Notification("Notificaciones activas", {
+          body: "¡Listo! Recibirás notificaciones mientras uses la app.",
+          icon: "/icon.svg"
+        });
+      }
     } else {
-      alert("Debes permitir las notificaciones en tu navegador/móvil.");
+      alert("Debes permitir las notificaciones en tu navegador/móvil para recibir alertas.");
     }
   };
 
@@ -62,19 +95,31 @@ export default function Settings() {
 
         {/* Notifications Test */}
         <div 
-          className="flex items-center justify-between p-6 hover:bg-neutral-50 cursor-pointer transition-colors border-b border-neutral-100"
-          onClick={handleTestNotification}
+          className="flex flex-col p-6 hover:bg-neutral-50 cursor-pointer transition-colors border-b border-neutral-100"
+          onClick={handleToggleNotification}
         >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center">
-              <Bell className="w-5 h-5" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className={cn("w-10 h-10 rounded-full flex items-center justify-center transition-colors", notificationPerm === 'granted' ? "bg-indigo-100 text-indigo-600" : "bg-neutral-100 text-neutral-400")}>
+                {notificationPerm === 'granted' ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
+              </div>
+              <div>
+                <h3 className="font-bold text-neutral-800">Notificaciones PWA</h3>
+                <p className="text-xs text-neutral-500">
+                  {notificationPerm === 'granted' ? "Activas - click para probar" : "Desactivadas - click para activar"}
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-bold text-neutral-800">Notificaciones</h3>
-              <p className="text-xs text-neutral-500">Activar y probar avisos / vibración</p>
+            
+            {/* Toggle switch visual indicator */}
+            <div className={cn("w-12 h-6 rounded-full p-1 flex items-center transition-colors", notificationPerm === 'granted' ? "bg-indigo-500" : "bg-neutral-200")}>
+              <div className={cn("w-4 h-4 bg-white rounded-full shadow-sm transition-transform", notificationPerm === 'granted' ? "translate-x-6" : "translate-x-0")} />
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-neutral-400" />
+          
+          <div className="mt-4 p-3 bg-blue-50 text-blue-800 rounded-xl text-[10px] sm:text-xs">
+            <strong>Nota sobre iOS/Móviles:</strong> Para que las notificaciones funcionen completamente en segundo plano cuando la app está cerrada, los navegadores y sistemas operativos (especialmente iOS) requieren servicios adicionales u opciones directas en <span className="font-bold">Ajustes &gt; Safari / Web</span> de tu dispositivo. Asegúrate de añadirla a la pantalla de inicio.
+          </div>
         </div>
 
         {/* Manual */}

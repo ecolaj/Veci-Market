@@ -37,7 +37,7 @@ function Layout() {
     const perm = await Notification.requestPermission();
     setNotificationPerm(perm);
     if (perm === 'granted') {
-      await requestNotificationPermission();
+      await requestNotificationPermission(user?.id);
     }
   };
   

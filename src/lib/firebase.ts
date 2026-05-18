@@ -1,11 +1,13 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, initializeFirestore, doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+}, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
@@ -19,16 +21,25 @@ try {
   console.warn("Firebase Messaging not supported in this environment");
 }
 
-export async function requestNotificationPermission() {
+export async function requestNotificationPermission(userId?: string) {
   if (!messaging) return null;
   try {
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
       const currentToken = await getToken(messaging, { 
-        // user needs to add VAPID key in production
-        // vapidKey: 'YOUR_PUBLIC_VAPID_KEY_HERE' 
+        vapidKey: (import.meta as any).env.VITE_FIREBASE_VAPID_KEY || undefined
       });
       if (currentToken) {
+        if (userId) {
+          try {
+            await updateDoc(doc(db, 'users', userId), {
+              fcm_tokens: arrayUnion(currentToken)
+            });
+            console.log("FCM Token saved to user document.");
+          } catch(err) {
+            console.error("Error saving FCM token", err);
+          }
+        }
         return currentToken;
       }
     }

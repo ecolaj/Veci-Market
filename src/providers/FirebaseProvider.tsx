@@ -14,11 +14,7 @@ export default function FirebaseProvider({ children }: { children: React.ReactNo
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
         // Handle Notifications
-        requestNotificationPermission().then(token => {
-          if (token) {
-            updateDoc(doc(db, 'users', user.uid), { fcm_token: token }).catch(console.error);
-          }
-        });
+        requestNotificationPermission(user.uid);
 
         // Fetch custom user doc
         const userDoc = await getDoc(doc(db, 'users', user.uid));
@@ -94,6 +90,50 @@ export default function FirebaseProvider({ children }: { children: React.ReactNo
 
         // Vendor orders
         const unsubVendorOrders = onSnapshot(query(collection(db, 'orders'), where('vendor_id', '==', user.uid)), (snapshot) => {
+          let hasNewOrders = false;
+          let newOrderTitle = "";
+          let newOrderBody = "";
+          
+          snapshot.docChanges().forEach((change) => {
+             // Only alert on newly added documents that represent pending orders
+             // We need to avoid alerting on the initial fetch.
+             // Usually onSnapshot fires 'added' for all initial docs.
+             // We can check if the doc was created in the last 10 seconds to guess it's truly new in this session
+             if (change.type === 'added') {
+                const data = change.doc.data();
+                if (data.status === 'pending') {
+                   const created = new Date(data.created_at).getTime();
+                   const now = new Date().getTime();
+                   if (now - created < 15000) { // within 15 seconds
+                     hasNewOrders = true;
+                     newOrderTitle = `Nuevo pedido de ${data.delivery_address || 'un cliente'}`;
+                     newOrderBody = `Tienes 1 nuevo pedido pendiente.`;
+                   }
+                }
+             }
+          });
+
+          if (hasNewOrders && 'Notification' in window && Notification.permission === 'granted') {
+             try {
+                if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+                   navigator.serviceWorker.ready.then(registration => {
+                      registration.showNotification(newOrderTitle, {
+                         body: newOrderBody,
+                         icon: '/icon.svg',
+                         tag: 'new-order'
+                      } as any);
+                   });
+                } else {
+                   new Notification(newOrderTitle, {
+                      body: newOrderBody,
+                      icon: '/icon.svg'
+                   });
+                }
+             } catch(e) {
+                 console.log("Notification error", e);
+             }
+          }
+
           useAppStore.getState().mergeOrders(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any)));
         });
 

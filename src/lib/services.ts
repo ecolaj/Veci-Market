@@ -38,6 +38,22 @@ export const services = {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       });
+
+      // Call Express API to trigger native push notification
+      try {
+        await fetch('/api/notify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            vendorId: data.vendor_id,
+            title: `Nuevo pedido de ${data.delivery_address || 'un cliente'}`,
+            body: 'Tienes 1 nuevo pedido pendiente. Toca para ver los detalles.',
+            data: { url: '/dashboard/orders' }
+          })
+        });
+      } catch (notifyErr) {
+        console.error("Error triggering push notification:", notifyErr);
+      }
     } catch (e) {
       handleFirestoreError(e, OperationType.CREATE, 'orders');
     }

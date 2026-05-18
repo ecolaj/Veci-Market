@@ -41,11 +41,16 @@ export const services = {
 
       // Call Express API to trigger native push notification
       try {
+        const { getDoc } = await import('firebase/firestore');
+        const vendorDoc = await getDoc(doc(db, 'users', data.vendor_id));
+        const tokens = vendorDoc.exists() ? (vendorDoc.data()?.fcm_tokens || []) : [];
+        
         await fetch('/api/notify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             vendorId: data.vendor_id,
+            tokens,
             title: `Nuevo pedido de ${data.delivery_address || 'un cliente'}`,
             body: 'Tienes 1 nuevo pedido pendiente. Toca para ver los detalles.',
             data: { url: '/dashboard/orders' }

@@ -46,22 +46,7 @@ async function startServer() {
     }
 
     try {
-      const { vendorId, title, body, data } = req.body;
-
-      if (!vendorId) {
-        return res.status(400).json({ error: "No vendorId provided" });
-      }
-      
-      const firestoreDatabaseId = firebaseConfig.firestoreDatabaseId || "(default)";
-      const db = getFirestore(firestoreDatabaseId);
-
-      const userDoc = await db.collection('users').doc(vendorId).get();
-      if (!userDoc.exists) {
-        return res.status(404).json({ error: "Vendor not found" });
-      }
-
-      const userData = userDoc.data();
-      const tokens = userData?.fcm_tokens || [];
+      const { vendorId, title, body, data, tokens } = req.body;
 
       if (!tokens || !tokens.length) {
         return res.status(400).json({ error: "Vendor does not have any registered devices" });

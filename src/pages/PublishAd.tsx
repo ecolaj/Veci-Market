@@ -143,7 +143,7 @@ export default function PublishAd() {
 
   return (
     <div className="bg-white min-h-screen">
-      <div className="sticky top-0 z-50 bg-white border-b border-neutral-100 px-4 h-16 flex items-center gap-4">
+      <div className="sticky top-0 z-50 bg-white border-b border-neutral-100 px-4 h-16 flex items-center gap-4 pt-safe box-content">
         <button onClick={() => navigate(-1)} className="p-2 hover:bg-neutral-100 rounded-full transition-colors">
           <ArrowLeft className="w-6 h-6 text-neutral-600" />
         </button>

@@ -47,8 +47,8 @@ function Layout() {
   return (
     <div className="flex flex-col min-h-screen bg-neutral-50 text-neutral-900 font-sans">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-neutral-200">
-        <div className="max-w-5xl mx-auto px-4 h-20 flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-white border-b border-neutral-200 pt-safe box-content">
+        <div className="max-w-5xl mx-auto px-4 h-16 sm:h-20 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 font-bold text-xl tracking-tight">
             <span className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-emerald-200">
               V

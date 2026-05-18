@@ -8,6 +8,7 @@ import { es } from 'date-fns/locale';
 import { PaymentMethod } from '../types';
 import { cn, formatPrice } from '../lib/utils';
 import { Link } from 'react-router-dom';
+import { ContactPhone } from '../components/ContactPhone';
 
 export default function ClassifiedDetail() {
   const { id } = useParams();
@@ -210,9 +211,14 @@ export default function ClassifiedDetail() {
                  )}
                  <div>
                    <p className="font-bold text-neutral-800 group-hover:text-emerald-600">{vendor?.display_name}</p>
-                   <p className="text-xs text-neutral-500 flex items-center gap-1">
+                   <p className="text-xs text-neutral-500 flex items-center gap-1 mb-1">
                      <MapPin className="w-3 h-3" /> {vendor?.sector}
                    </p>
+                   {vendor?.phone && (
+                     <div className="mt-1" onClick={(e) => e.stopPropagation()}>
+                       <ContactPhone phone={vendor.phone} className="text-xs" />
+                     </div>
+                   )}
                  </div>
               </div>
             </div>

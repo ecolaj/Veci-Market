@@ -6,6 +6,7 @@ import { formatPrice, cn } from '../lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
+import { ContactPhone } from '../components/ContactPhone';
 
 export default function UserProfile() {
   const { id } = useParams();
@@ -44,10 +45,16 @@ export default function UserProfile() {
          )}
          <div className="text-center md:text-left flex-1">
            <h1 className="text-3xl font-black text-neutral-800 mb-2">{user.display_name}</h1>
-           <div className="flex items-center justify-center md:justify-start gap-2 text-neutral-500 mb-4">
+           <div className="flex items-center justify-center md:justify-start gap-2 text-neutral-500 mb-2">
              <MapPin className="w-4 h-4" />
              <span className="font-medium">{user.sector}</span>
            </div>
+           
+           {user.phone && (
+             <div className="flex items-center justify-center md:justify-start mb-4">
+               <ContactPhone phone={user.phone} />
+             </div>
+           )}
            
            <div className="flex items-center justify-center md:justify-start gap-6">
              <div className="text-center">

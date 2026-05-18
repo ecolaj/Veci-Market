@@ -1,3 +1,4 @@
+import { ContactPhone } from '../../components/ContactPhone';
 import { useState } from 'react';
 import { useAppStore, useAuthStore } from '../../store';
 import { formatDistanceToNow } from 'date-fns';
@@ -112,7 +113,7 @@ export default function Inbox() {
                 <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-100 text-sm">
                   <p className="font-black mb-2 text-neutral-700">Información del {activeTab === 'sales' ? 'Comprador' : 'Vendedor'}</p>
                   <p><span className="text-neutral-400 font-bold">Nombre:</span> <span className="font-medium">{otherUser?.display_name}</span></p>
-                  <p><span className="text-neutral-400 font-bold">Contacto:</span> <span className="font-medium">{otherUser?.phone || otherUser?.email}</span></p>
+                  <div className="flex items-center gap-2"><span className="text-neutral-400 font-bold">Contacto:</span> {otherUser?.phone ? <ContactPhone phone={otherUser.phone} /> : <span className="font-medium">{otherUser?.email}</span>}</div>
                   {activeTab === 'sales' && (
                     <>
                       <p><span className="text-neutral-400 font-bold">Entrega en:</span> <span className="font-medium">{order.delivery_address}</span></p>

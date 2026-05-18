@@ -68,6 +68,17 @@ async function startServer() {
         },
         data: data || {},
         tokens: tokens,
+        webpush: {
+          notification: {
+            title: title || "Nueva Notificación",
+            body: body || "",
+            icon: '/icon.svg',
+            vibrate: [200, 100, 200]
+          },
+          fcmOptions: {
+            link: data?.url || '/'
+          }
+        },
         apns: {
           payload: {
             aps: {

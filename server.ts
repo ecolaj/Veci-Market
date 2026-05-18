@@ -2,8 +2,10 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import admin from "firebase-admin";
+import { getFirestore } from "firebase-admin/firestore";
 import dotenv from "dotenv";
 import cors from "cors";
+import firebaseConfig from "./firebase-applet-config.json";
 
 dotenv.config();
 
@@ -24,6 +26,7 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
 } else {
   console.warn("FIREBASE_SERVICE_ACCOUNT_JSON environment variable is missing. Push notifications will be disabled.");
 }
+
 
 async function startServer() {
   const app = express();
@@ -49,7 +52,10 @@ async function startServer() {
         return res.status(400).json({ error: "No vendorId provided" });
       }
       
-      const userDoc = await admin.firestore().collection('users').doc(vendorId).get();
+      const firestoreDatabaseId = firebaseConfig.firestoreDatabaseId || "(default)";
+      const db = getFirestore(firestoreDatabaseId);
+
+      const userDoc = await db.collection('users').doc(vendorId).get();
       if (!userDoc.exists) {
         return res.status(404).json({ error: "Vendor not found" });
       }

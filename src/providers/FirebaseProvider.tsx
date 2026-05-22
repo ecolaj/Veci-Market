@@ -17,44 +17,52 @@ export default function FirebaseProvider({ children }: { children: React.ReactNo
         requestNotificationPermission(user.uid);
 
         // Fetch custom user doc
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          if (userData.status === 'banned') {
-            alert('Tu cuenta ha sido suspendida. Comunícate con soporte.');
-            const { signOut } = await import('firebase/auth');
-            await signOut(auth);
-            return;
+        const unsubUserDoc = onSnapshot(doc(db, 'users', user.uid), async (userDoc) => {
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            if (userData.status === 'banned') {
+              alert('Tu cuenta ha sido suspendida. Comunícate con soporte.');
+              const { signOut } = await import('firebase/auth');
+              await signOut(auth);
+              return;
+            }
+            login({
+              id: user.uid,
+              email: userData.email,
+              display_name: userData.display_name,
+              avatar_url: userData.avatar_url,
+              sector: userData.sector,
+              phone: userData.phone,
+              secondary_phone: userData.secondary_phone,
+              house_number: userData.house_number,
+              role: userData.role,
+              status: userData.status,
+              created_at: userData.created_at,
+            });
+          } else {
+            // If no doc exists but they logged in, we set them as minimal user 
+            // and let the app handle it (usually by redirecting to a setup screen).
+            login({
+              id: user.uid,
+              email: user.email || '',
+              display_name: user.displayName || 'Nuevo Usuario',
+              avatar_url: user.photoURL || '',
+              sector: '',
+              phone: '',
+              role: 'buyer', // default
+              created_at: new Date().toISOString()
+            });
           }
-          login({
-            id: user.uid,
-            email: userData.email,
-            display_name: userData.display_name,
-            avatar_url: userData.avatar_url,
-            sector: userData.sector,
-            phone: userData.phone,
-            secondary_phone: userData.secondary_phone,
-            house_number: userData.house_number,
-            role: userData.role,
-            status: userData.status,
-            created_at: userData.created_at,
-          });
-        } else {
-          // If no doc exists but they logged in, we set them as minimal user 
-          // and let the app handle it (usually by redirecting to a setup screen).
-          // We can set a temporary token or use AuthStore partial info.
-          login({
-            id: user.uid,
-            email: user.email || '',
-            display_name: user.displayName || 'Nuevo Usuario',
-            avatar_url: user.photoURL || '',
-            sector: '',
-            phone: '',
-            role: 'buyer', // default
-            created_at: new Date().toISOString()
-          });
-        }
+        });
+        
+        // Let's store the unsubscribe to call it when auth state changes or unmounts,
+        // Actually, we can attach the unsubUserDoc to a variable and clean it up inside the else/cleanup
+        (window as any)._unsubUserDoc = unsubUserDoc;
       } else {
+        if ((window as any)._unsubUserDoc) {
+          (window as any)._unsubUserDoc();
+          (window as any)._unsubUserDoc = null;
+        }
         logout();
       }
       setAuthInitialized(true);

@@ -19,16 +19,38 @@ export default function ProfileSettings() {
     avatar_url: user.avatar_url || ''
   });
 
+  React.useEffect(() => {
+    setFormData(prev => ({
+      display_name: user.display_name || prev.display_name,
+      phone: user.phone || prev.phone,
+      secondary_phone: user.secondary_phone || prev.secondary_phone,
+      sector: user.sector || prev.sector,
+      house_number: user.house_number || prev.house_number,
+      avatar_url: user.avatar_url || prev.avatar_url
+    }));
+  }, [user.display_name, user.phone, user.secondary_phone, user.sector, user.house_number, user.avatar_url]);
+
   const [saved, setSaved] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await services.updateProfile(user.id, formData);
-    updateProfile(formData);
-    setLoading(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      await services.updateProfile(user.id, formData);
+      updateProfile(formData);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err: any) {
+      console.error(err);
+      let errorMsg = err.message;
+      try {
+        const parsed = JSON.parse(err.message);
+        errorMsg = parsed.error || err.message;
+      } catch (e) {}
+      alert('Hubo un error al guardar los cambios: ' + errorMsg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

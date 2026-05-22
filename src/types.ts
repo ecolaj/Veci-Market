@@ -1,4 +1,4 @@
-export type UserRole = 'buyer' | 'vendor';
+export type UserRole = 'buyer' | 'vendor' | 'admin';
 
 export interface UserProfile {
   id: string; // matches Supabase auth.users id
@@ -10,6 +10,7 @@ export interface UserProfile {
   phone: string;
   secondary_phone?: string;
   role: UserRole;
+  status?: 'active' | 'banned';
   created_at: string;
 }
 
@@ -55,6 +56,15 @@ export interface Review {
   user_id: string;
   rating: number;
   comment: string;
+  created_at: string;
+}
+
+export interface Report {
+  id: string;
+  classified_id: string;
+  reporter_id: string;
+  reason: string;
+  status: 'pending' | 'resolved' | 'dismissed';
   created_at: string;
 }
 

@@ -16,6 +16,7 @@ import Inbox from './pages/Dashboard/Inbox'; // We will create this
 import Stats from './pages/Dashboard/Stats'; // We will create this
 import ProfileSettings from './pages/Dashboard/ProfileSettings';
 import SettingsView from './pages/Dashboard/Settings';
+import AdminReports from './pages/Dashboard/AdminReports';
 
 import RegisterPage from './pages/Auth/Register';
 import PublishAd from './pages/PublishAd';
@@ -228,6 +229,7 @@ export default function App() {
             <Route index element={<MyClassifieds />} />
             <Route path="profile" element={<ProfileSettings />} />
             <Route path="settings" element={<SettingsView />} />
+            <Route path="reports" element={<AdminReports />} />
             <Route path="inbox" element={<Inbox />} />
             <Route path="stats" element={<Stats />} />
           </Route>

@@ -1,6 +1,6 @@
 import { useAuthStore } from '../../store';
 import { services } from '../../lib/services';
-import { LogOut, User, Shield, BookOpen, ChevronRight, AlertTriangle, X, Bell, BellOff } from 'lucide-react';
+import { LogOut, User, Shield, BookOpen, ChevronRight, AlertTriangle, X, Bell, BellOff, ShieldAlert } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import ThemeToggle from '../../components/ThemeToggle';
@@ -75,6 +75,24 @@ export default function Settings() {
       <h1 className="text-2xl font-black text-neutral-800">Ajustes</h1>
 
       <div className="bg-white rounded-[32px] overflow-hidden border border-neutral-100 shadow-sm">
+        {user.role === 'admin' && (
+          <div 
+            onClick={() => navigate('/dashboard/reports')}
+            className="flex items-center justify-between p-6 hover:bg-red-50 cursor-pointer transition-colors border-b border-neutral-100 sm:hidden"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+                <ShieldAlert className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-red-600">Admin Reportes</h3>
+                <p className="text-xs text-red-400">Gestionar reportes de la comunidad</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-red-300" />
+          </div>
+        )}
+
         <div 
           onClick={() => navigate('/dashboard/profile')}
           className="flex items-center justify-between p-6 hover:bg-neutral-50 cursor-pointer transition-colors border-b border-neutral-100"

@@ -1,6 +1,6 @@
 import { Outlet, NavLink, Navigate, useNavigate } from 'react-router-dom';
 import { useAuthStore, useAppStore } from '../../store';
-import { LayoutDashboard, Inbox as InboxIcon, BarChart3, LogOut, Package, UserCircle, Settings } from 'lucide-react';
+import { LayoutDashboard, Inbox as InboxIcon, BarChart3, LogOut, Package, UserCircle, Settings, ShieldAlert } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export default function DashboardLayout() {
@@ -25,6 +25,18 @@ export default function DashboardLayout() {
           </div>
           
           <nav className="flex sm:flex-col overflow-x-auto sm:overflow-visible gap-2 sm:gap-2 pb-2 sm:pb-0 scrollbar-hide">
+            {user.role === 'admin' && (
+              <NavLink 
+                to="/dashboard/reports" 
+                className={({isActive}) => cn(
+                  "flex items-center shrink-0 gap-2 sm:gap-3 px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-sm font-bold transition-all",
+                  isActive ? "bg-red-50 text-red-600 shadow-sm" : "text-neutral-500 bg-neutral-50 sm:bg-transparent hover:bg-red-50 hover:text-red-700 hover:scale-[1.02]"
+                )}
+              >
+                <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
+                <span className="text-red-600">Admin Reportes</span>
+              </NavLink>
+            )}
             <NavLink 
               to="/dashboard/settings" 
               className={({isActive}) => cn(

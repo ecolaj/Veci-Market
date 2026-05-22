@@ -18,6 +18,35 @@ async function testConnection() {
 }
 testConnection();
 
+// Lógica para auto-actualizar la PWA sin que el usuario deba desinstalar
+if ('serviceWorker' in navigator) {
+  let refreshing = false;
+  
+  // Detecta cuando un nuevo Service Worker toma el control y refresca la página
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+      refreshing = true;
+      window.location.reload();
+    }
+  });
+
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.ready.then((registration) => {
+      // Cuando la PWA vuelve a estar en primer plano, buscamos actualizaciones del código
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          registration.update().catch(console.error);
+        }
+      });
+      
+      // También chequeamos cada 15 minutos si la app se queda abierta
+      setInterval(() => {
+        registration.update().catch(console.error);
+      }, 15 * 60 * 1000);
+    });
+  });
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <FirebaseProvider>

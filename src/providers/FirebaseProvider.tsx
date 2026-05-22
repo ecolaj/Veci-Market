@@ -20,6 +20,12 @@ export default function FirebaseProvider({ children }: { children: React.ReactNo
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
+          if (userData.status === 'banned') {
+            alert('Tu cuenta ha sido suspendida. Comunícate con soporte.');
+            const { signOut } = await import('firebase/auth');
+            await signOut(auth);
+            return;
+          }
           login({
             id: user.uid,
             email: userData.email,
@@ -30,6 +36,7 @@ export default function FirebaseProvider({ children }: { children: React.ReactNo
             secondary_phone: userData.secondary_phone,
             house_number: userData.house_number,
             role: userData.role,
+            status: userData.status,
             created_at: userData.created_at,
           });
         } else {

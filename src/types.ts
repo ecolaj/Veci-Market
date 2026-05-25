@@ -11,6 +11,7 @@ export interface UserProfile {
   secondary_phone?: string;
   role: UserRole;
   status?: 'active' | 'banned';
+  saved_ads?: string[];
   created_at: string;
 }
 

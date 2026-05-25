@@ -113,5 +113,30 @@ export const services = {
     } catch (e) {
       console.error('Error signing out', e);
     }
+  },
+
+  async toggleFavorite(userId: string, classifiedId: string, isFavorited: boolean) {
+    try {
+      const { useAuthStore } = await import('../store');
+      const currentUser = useAuthStore.getState().user;
+      
+      // Optimistic update locally
+      if (currentUser) {
+        const currentAds = currentUser.saved_ads || [];
+        const newAds = isFavorited 
+          ? currentAds.filter(id => id !== classifiedId)
+          : [...currentAds, classifiedId];
+          
+        useAuthStore.getState().updateProfile({ saved_ads: newAds });
+      }
+
+      const { arrayUnion, arrayRemove } = await import('firebase/firestore');
+      await updateDoc(doc(db, 'users', userId), {
+        saved_ads: isFavorited ? arrayRemove(classifiedId) : arrayUnion(classifiedId)
+      });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${userId}`);
+      // Since we don't have a reliable previous state, we rely on the next snapshot to fix UI if it fails
+    }
   }
 };

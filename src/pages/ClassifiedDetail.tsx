@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppStore, useAuthStore } from '../store';
 import { services } from '../lib/services';
-import { Store, User, Phone, MapPin, ArrowLeft, CheckCircle2, CreditCard, Banknote, Landmark, Star, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Store, User, Phone, MapPin, ArrowLeft, CheckCircle2, CreditCard, Banknote, Landmark, Star, X, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import React, { useState, useCallback, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -164,11 +164,24 @@ export default function ClassifiedDetail() {
         <div className="p-6 sm:p-10">
           <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
             <div>
-              {category && (
-                <span className={`inline-block px-3 py-1 text-xs font-bold rounded-md uppercase tracking-wider mb-3 ${category.color}`}>
-                  {category.name}
-                </span>
-              )}
+              <div className="flex items-center gap-3 mb-3">
+                {category && (
+                  <span className={`inline-block px-3 py-1 text-xs font-bold rounded-md uppercase tracking-wider ${category.color}`}>
+                    {category.name}
+                  </span>
+                )}
+                {user && (
+                  <button
+                    onClick={() => services.toggleFavorite(user.id, item.id, user?.saved_ads?.includes(item.id) || false)}
+                    className={cn(
+                      "p-1.5 rounded-full backdrop-blur-sm shadow-sm transition-colors border",
+                      (user?.saved_ads?.includes(item.id) || false) ? "bg-red-50 text-red-500 border-red-100" : "bg-neutral-50 text-neutral-400 hover:bg-neutral-100 border-neutral-200"
+                    )}
+                  >
+                    <Heart className={cn("w-5 h-5 transition-transform duration-300", (user?.saved_ads?.includes(item.id)) && "fill-current scale-110")} />
+                  </button>
+                )}
+              </div>
               <h1 className="text-2xl sm:text-4xl font-black text-neutral-800">{item.title}</h1>
               <p className="text-sm text-neutral-500 mt-2 font-medium">
                 Publicado hace {formatDistanceToNow(new Date(item.created_at), { locale: es })}

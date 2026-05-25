@@ -1,17 +1,19 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAppStore } from '../store';
-import { Store, MapPin, ArrowLeft } from 'lucide-react';
+import { useAppStore, useAuthStore } from '../store';
+import { Store, MapPin, ArrowLeft, Heart } from 'lucide-react';
 import { Classified } from '../types';
 import { formatPrice, cn } from '../lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
 import { ContactPhone } from '../components/ContactPhone';
+import { services } from '../lib/services';
 
 export default function UserProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { users, classifieds, categories } = useAppStore();
+  const { user: currentUser, isAuthenticated } = useAuthStore();
 
   const user = users.find(u => u.id === id);
   const userClassifieds = classifieds.filter(c => c.vendor_id === id && c.status === 'active');
@@ -79,6 +81,8 @@ export default function UserProfile() {
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
           {userClassifieds.map(item => {
             const category = categories.find(c => c.id === item.category_id);
+            const isSaved = currentUser?.saved_ads?.includes(item.id);
+
             return (
               <Link 
                 key={item.id} 
@@ -87,6 +91,22 @@ export default function UserProfile() {
               >
                 <div className="relative h-32 sm:h-44 bg-neutral-100 rounded-[16px] sm:rounded-2xl mb-3 sm:mb-4 overflow-hidden">
                    <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white/90 backdrop-blur-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-black text-emerald-600 shadow-sm z-10">{formatPrice(item.price)}</div>
+                   
+                   {isAuthenticated && currentUser?.id !== item.vendor_id && (
+                     <button 
+                       onClick={(e) => {
+                         e.preventDefault();
+                         services.toggleFavorite(currentUser.id, item.id, isSaved || false);
+                       }}
+                       className={cn(
+                         "absolute top-2 left-2 sm:top-3 sm:left-3 p-1.5 sm:p-2 rounded-full backdrop-blur-sm shadow-sm transition-colors z-10 hover:scale-105 active:scale-95",
+                         isSaved ? "bg-red-50 text-red-500" : "bg-white/80 text-neutral-400 hover:bg-white"
+                       )}
+                     >
+                       <Heart className={cn("w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300", isSaved && "fill-current scale-110")} />
+                     </button>
+                   )}
+
                   {(item.images?.[0] || item.image_url) ? (
                     <img 
                       src={item.images?.[0] || item.image_url} 

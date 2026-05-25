@@ -1,15 +1,17 @@
 import { useState, useMemo } from 'react';
-import { useAppStore } from '../store';
-import { Search, Store, Star } from 'lucide-react';
+import { useAppStore, useAuthStore } from '../store';
+import { Search, Store, Star, Heart } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { cn, formatPrice } from '../lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { services } from '../lib/services';
 
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCategory = searchParams.get('category') || '';
   
+  const { user } = useAuthStore();
   const { classifieds, categories, users, reviews } = useAppStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
@@ -108,6 +110,7 @@ export default function SearchPage() {
               const category = categories.find(c => c.id === item.category_id);
               const rating = getAverageRating(item.id);
               const reviewCount = reviews.filter(r => r.classified_id === item.id).length;
+              const isSaved = user?.saved_ads?.includes(item.id) || false;
               
               return (
                 <Link 
@@ -117,6 +120,21 @@ export default function SearchPage() {
                 >
                   <div className="relative h-32 sm:h-44 bg-neutral-100 rounded-[16px] sm:rounded-2xl mb-3 sm:mb-4 overflow-hidden">
                      <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white/90 backdrop-blur-sm px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-black text-emerald-600 shadow-sm z-10">{formatPrice(item.price)}</div>
+                     {user && (
+                       <button
+                         onClick={(e) => {
+                           e.preventDefault();
+                           e.stopPropagation();
+                           services.toggleFavorite(user.id, item.id, isSaved);
+                         }}
+                         className={cn(
+                           "absolute top-2 left-2 sm:top-3 sm:left-3 p-1.5 sm:p-2 rounded-full backdrop-blur-sm shadow-sm transition-colors z-10 hover:scale-105 active:scale-95",
+                           isSaved ? "bg-red-50 text-red-500" : "bg-white/80 text-neutral-400 hover:bg-white"
+                         )}
+                       >
+                         <Heart className={cn("w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300", isSaved && "fill-current scale-110")} />
+                       </button>
+                     )}
                     {(item.images?.[0] || item.image_url) ? (
                       <img 
                         src={item.images?.[0] || item.image_url} 

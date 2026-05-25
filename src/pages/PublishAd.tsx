@@ -19,7 +19,9 @@ export default function PublishAd() {
   const editingId = searchParams.get('edit');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const [formData, setFormData] = useState<{title: string, description: string, price: string, category_id: string, image_url: string, images: string[], payment_methods: PaymentMethod[]}>({ title: '', description: '', price: '', category_id: categories[0]?.id || '', image_url: '', images: [], payment_methods: ['efectivo'] });
+    const sortedCategories = [...categories].sort((a, b) => a.name.localeCompare(b.name));
+    
+    const [formData, setFormData] = useState<{title: string, description: string, price: string, category_id: string, image_url: string, images: string[], payment_methods: PaymentMethod[]}>({ title: '', description: '', price: '', category_id: sortedCategories[0]?.id || '', image_url: '', images: [], payment_methods: ['efectivo'] });
 
   useEffect(() => {
     if (editingId) {
@@ -170,7 +172,7 @@ export default function PublishAd() {
             <div>
               <label className="block text-sm font-bold text-neutral-600 mb-2">Categoría</label>
               <select required value={formData.category_id} onChange={e => setFormData({...formData, category_id: e.target.value})} className="w-full p-4 bg-neutral-50 border border-neutral-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-400 font-medium cursor-pointer">
-                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                {sortedCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
           </div>

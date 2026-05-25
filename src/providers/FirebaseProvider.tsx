@@ -37,6 +37,7 @@ export default function FirebaseProvider({ children }: { children: React.ReactNo
               house_number: userData.house_number,
               role: userData.role,
               status: userData.status,
+              saved_ads: userData.saved_ads || [],
               created_at: userData.created_at,
             });
           } else {
@@ -49,7 +50,8 @@ export default function FirebaseProvider({ children }: { children: React.ReactNo
               avatar_url: user.photoURL || '',
               sector: '',
               phone: '',
-              role: 'buyer', // default
+              role: 'user', // default
+              saved_ads: [],
               created_at: new Date().toISOString()
             });
           }

@@ -34,7 +34,12 @@ export default function MyClassifieds() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-2xl font-black text-neutral-800">Mis Anuncios</h1>
+        <div>
+          <h1 className="text-2xl font-black text-neutral-800">Mis Anuncios</h1>
+          <button onClick={() => navigate('/dashboard/stats')} className="text-sm font-bold text-emerald-600 hover:text-emerald-700 mt-1">
+            Revisar Estadísticas →
+          </button>
+        </div>
         <button 
           onClick={() => navigate('/publish')}
           className="bg-emerald-500 text-white px-6 py-3 flex items-center justify-center gap-2 rounded-xl font-bold shadow-sm hover:scale-105 transition-transform"

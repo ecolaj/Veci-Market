@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Outlet, Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Home as HomeIcon, Search as SearchIcon, User, Bell, Menu, LayoutDashboard, Plus, Settings, Package, Info } from 'lucide-react';
+import { Home as HomeIcon, Search as SearchIcon, User, Bell, Menu, LayoutDashboard, Plus, Settings, Package, Info, Heart } from 'lucide-react';
 import { useAuthStore, useAppStore } from './store';
 import { cn } from './lib/utils';
 import React, { useEffect, useState } from 'react';
@@ -14,6 +14,7 @@ import DashboardLayout from './pages/Dashboard/DashboardLayout'; // We will crea
 import MyClassifieds from './pages/Dashboard/MyClassifieds'; // We will create this
 import Inbox from './pages/Dashboard/Inbox'; // We will create this
 import Stats from './pages/Dashboard/Stats'; // We will create this
+import Favorites from './pages/Dashboard/Favorites';
 import ProfileSettings from './pages/Dashboard/ProfileSettings';
 import SettingsView from './pages/Dashboard/Settings';
 import AdminReports from './pages/Dashboard/AdminReports';
@@ -22,6 +23,7 @@ import RegisterPage from './pages/Auth/Register';
 import PublishAd from './pages/PublishAd';
 import UserProfile from './pages/UserProfile';
 import Manual from './pages/Manual';
+import InstallGuide from './pages/InstallGuide';
 import Privacy from './pages/Privacy';
 import PWAPrompt from './components/PWAPrompt';
 
@@ -48,7 +50,7 @@ function Layout() {
   return (
     <div className="flex flex-col min-h-screen bg-neutral-50 text-neutral-900 font-sans">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-neutral-200 pt-safe box-content">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-neutral-200 pt-safe box-content">
         <div className="max-w-5xl mx-auto px-4 h-16 sm:h-20 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 font-bold text-xl tracking-tight">
             <span className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-emerald-200">
@@ -60,22 +62,35 @@ function Layout() {
           <div className="flex items-center gap-2 sm:gap-4">
             {isAuthenticated ? (
               <>
+                {user?.role === 'admin' && (
+                  <Link to="/dashboard/reports" className="hidden sm:inline-flex px-3 py-2 text-xs font-bold bg-amber-50 text-amber-700 rounded-xl hover:bg-amber-100 transition-colors">
+                    Admin Reportes
+                  </Link>
+                )}
                 <Link to="/publish" className="hidden sm:inline-flex text-sm font-bold bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl hover:bg-emerald-100 transition-colors">
                   + Nuevo Anuncio
                 </Link>
-                <Link to="/dashboard/inbox" className="relative p-2 text-neutral-600 hover:bg-neutral-100 rounded-full transition-colors">
-                  <Bell className="w-5 h-5" />
-                  {pendingOrders > 0 && (
-                    <span className="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 bg-red-500 text-white text-[10px] font-black px-1.5 min-w-[18px] h-[18px] rounded-full border-2 border-white flex items-center justify-center">
-                      {pendingOrders}
-                    </span>
-                  )}
-                </Link>
-                <Link to="/dashboard" className="flex items-center gap-3 bg-white p-1 pr-4 border border-neutral-200 hover:border-emerald-200 rounded-full shadow-sm transition-colors">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <Link to="/dashboard/favorites" className="relative p-2 text-neutral-600 hover:bg-red-50 hover:text-red-500 rounded-full transition-colors flex items-center justify-center">
+                    <Heart className="w-5 h-5 sm:w-6 sm:h-6" />
+                    {user?.saved_ads?.length ? (
+                      <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                    ) : null}
+                  </Link>
+                  <Link to="/dashboard/inbox" className="relative p-2 text-neutral-600 hover:bg-neutral-100 rounded-full transition-colors flex items-center justify-center">
+                    <Bell className="w-5 h-5 sm:w-6 sm:h-6" />
+                    {pendingOrders > 0 && (
+                      <span className="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 bg-red-500 text-white text-[10px] font-black px-1.5 min-w-[18px] h-[18px] rounded-full border-2 border-white flex items-center justify-center">
+                        {pendingOrders}
+                      </span>
+                    )}
+                  </Link>
+                </div>
+                <Link to="/dashboard/profile" className="flex items-center gap-3 bg-white p-1 pr-1 sm:pr-4 border border-neutral-200 hover:border-emerald-200 rounded-full shadow-sm transition-colors ml-1 sm:ml-0">
                   {user?.avatar_url ? (
-                    <img src={user.avatar_url} alt="Profile" className="w-9 h-9 rounded-full border-2 border-emerald-200 object-cover" referrerPolicy="no-referrer" />
+                    <img src={user.avatar_url} alt="Profile" className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-emerald-200 object-cover" referrerPolicy="no-referrer" />
                   ) : (
-                    <div className="w-9 h-9 border-2 border-emerald-200 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold">
+                    <div className="w-8 h-8 sm:w-9 sm:h-9 border-2 border-emerald-200 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold">
                       {user?.display_name?.charAt(0).toUpperCase()}
                     </div>
                   )}
@@ -154,7 +169,7 @@ function Layout() {
       <PWAPrompt />
 
       {/* Main Content */}
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-6 mb-16 sm:mb-0">
+      <main className="flex-1 max-w-5xl mx-auto w-full px-4 pt-[88px] sm:pt-[104px] pb-6 mb-16 sm:mb-0">
         <Outlet />
       </main>
 
@@ -224,6 +239,7 @@ export default function App() {
           <Route path="classified/:id" element={<ClassifiedDetail />} />
           <Route path="user/:id" element={<UserProfile />} />
           <Route path="manual" element={<Manual />} />
+          <Route path="install" element={<InstallGuide />} />
           <Route path="privacy" element={<Privacy />} />
           <Route path="dashboard" element={<DashboardLayout />}>
             <Route index element={<MyClassifieds />} />
@@ -231,6 +247,7 @@ export default function App() {
             <Route path="settings" element={<SettingsView />} />
             <Route path="reports" element={<AdminReports />} />
             <Route path="inbox" element={<Inbox />} />
+            <Route path="favorites" element={<Favorites />} />
             <Route path="stats" element={<Stats />} />
           </Route>
         </Route>

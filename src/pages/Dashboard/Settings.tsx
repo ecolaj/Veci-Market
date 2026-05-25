@@ -1,6 +1,6 @@
 import { useAuthStore } from '../../store';
 import { services } from '../../lib/services';
-import { LogOut, User, Shield, BookOpen, ChevronRight, AlertTriangle, X, Bell, BellOff, ShieldAlert } from 'lucide-react';
+import { LogOut, User, Shield, BookOpen, ChevronRight, AlertTriangle, X, Bell, BellOff, ShieldAlert, DownloadCloud } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import ThemeToggle from '../../components/ThemeToggle';
@@ -169,6 +169,23 @@ export default function Settings() {
             <div>
               <h3 className="font-bold text-neutral-800">Manual de Usuario</h3>
               <p className="text-xs text-neutral-500">Guía de cómo usar VeciMarket</p>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-neutral-400" />
+        </div>
+
+        {/* Install Guide */}
+        <div 
+          className="flex items-center justify-between p-6 hover:bg-neutral-50 cursor-pointer transition-colors border-b border-neutral-100"
+          onClick={() => navigate("/install")}
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+              <DownloadCloud className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-neutral-800">Guía de Instalación</h3>
+              <p className="text-xs text-neutral-500">Cómo agregar como App en tu celular</p>
             </div>
           </div>
           <ChevronRight className="w-5 h-5 text-neutral-400" />

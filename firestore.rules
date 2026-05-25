@@ -8,7 +8,7 @@ service cloud.firestore {
     function isSignedIn() { 
       return request.auth != null && 
       (!exists(/databases/$(database)/documents/users/$(request.auth.uid)) || 
-      get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status != 'banned'); 
+      get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('status', 'active') != 'banned'); 
     }
     function isAdmin() {
       return isSignedIn() &&
@@ -31,7 +31,7 @@ service cloud.firestore {
       allow get: if true;
       allow list: if true;
       allow create: if isSignedIn() && request.auth.uid == userId; // && isValidUser(incoming());
-      allow update: if (isSignedIn() && request.auth.uid == userId && incoming().role == existing().role) || isAdmin();
+      allow update: if (isSignedIn() && request.auth.uid == userId && (!incoming().keys().hasAny(['role']) || incoming().role == existing().role) && (!incoming().keys().hasAny(['status']) || incoming().status == existing().status)) || isAdmin();
     }
 
     match /categories/{categoryId} {

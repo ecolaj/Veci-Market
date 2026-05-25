@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Utensils, ShoppingBag, Wrench, Shirt, Store, Star } from 'lucide-react';
+import { Utensils, ShoppingBag, Wrench, Shirt, Store, Star, Cake, Sparkles, Home as HomeIcon, PawPrint, Package, GraduationCap, Smartphone, Car, HeartPulse } from 'lucide-react';
 import { cn, formatPrice } from '../lib/utils';
 import { useAppStore, useAuthStore } from '../store';
 import { Link, useNavigate } from 'react-router-dom';
@@ -11,6 +11,15 @@ const iconMap: Record<string, any> = {
   'shopping-bag': ShoppingBag,
   wrench: Wrench,
   shirt: Shirt,
+  cake: Cake,
+  sparkles: Sparkles,
+  home: HomeIcon,
+  'paw-print': PawPrint,
+  package: Package,
+  'graduation-cap': GraduationCap,
+  smartphone: Smartphone,
+  car: Car,
+  'heart-pulse': HeartPulse,
 };
 
 export default function Home() {
@@ -45,7 +54,7 @@ export default function Home() {
           <Store className="w-5 h-5 text-neutral-400" />
           Categorías
         </h2>
-        <div className="grid grid-cols-4 gap-2 sm:gap-4">
+        <div className="grid grid-cols-6 gap-1.5 sm:gap-3">
           {categories.map((cat) => {
             const Icon = iconMap[cat.icon_name] || Store;
             return (
@@ -53,12 +62,12 @@ export default function Home() {
                 key={cat.id} 
                 to={`/search?category=${cat.id}`}
                 className={cn(
-                  "flex flex-col items-center justify-center p-3 sm:p-6 rounded-[20px] transition-transform hover:scale-105 active:scale-95 shadow-sm border border-neutral-50 text-center",
+                  "flex flex-col items-center justify-start p-1.5 sm:p-2.5 text-center rounded-xl transition-transform hover:scale-105 active:scale-95 shadow-sm border",
                   cat.color
                 )}
               >
-                <Icon className="w-6 h-6 sm:w-8 sm:h-8 mb-2 sm:mb-3" />
-                <span className="font-bold text-[10px] sm:text-sm tracking-wide leading-tight">{cat.name}</span>
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5 mb-1 opacity-80" />
+                <span className="font-bold text-[7.5px] sm:text-[9px] tracking-tight leading-tight line-clamp-2">{cat.name}</span>
               </Link>
             )
           })}

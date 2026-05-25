@@ -31,7 +31,6 @@ interface AppState {
   setUsers: (data: UserProfile[]) => void;
   setReviews: (data: Review[]) => void;
   setOrders: (data: Order[]) => void;
-  mergeOrders: (data: Order[]) => void;
 }
 
 const CATEGORIES: Category[] = [
@@ -53,13 +52,4 @@ export const useAppStore = create<AppState>((set, get) => ({
   setUsers: (users) => set({ users }),
   setReviews: (reviews) => set({ reviews }),
   setOrders: (orders) => set({ orders }),
-  
-  mergeOrders: (newOrders) => {
-    set(state => {
-      // Merge by ID keeping the newest info
-      const orderMap = new Map(state.orders.map(o => [o.id, o]));
-      newOrders.forEach(o => orderMap.set(o.id, o));
-      return { orders: Array.from(orderMap.values()) };
-    });
-  }
 }));

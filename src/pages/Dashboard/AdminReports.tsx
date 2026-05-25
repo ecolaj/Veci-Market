@@ -24,6 +24,9 @@ export default function AdminReports() {
       });
       setReports(reps);
       setLoading(false);
+    }, (error) => {
+      console.error("Error fetching reports:", error);
+      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -80,7 +83,12 @@ export default function AdminReports() {
   };
 
   if (loading) {
-     return <div className="p-8 text-center text-neutral-500">Cargando reportes...</div>;
+     return (
+       <div className="p-12 text-center flex flex-col items-center justify-center text-neutral-400">
+         <div className="w-8 h-8 rounded-full border-4 border-neutral-200 border-t-neutral-400 animate-spin mb-4" />
+         <p className="text-sm font-medium">Verificando estado...</p>
+       </div>
+     );
   }
 
   return (
@@ -187,7 +195,7 @@ export default function AdminReports() {
         {reports.length === 0 && (
           <div className="text-center py-20 bg-white rounded-3xl border border-neutral-100">
              <Shield className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-             <p className="text-neutral-500 font-medium">¡No hay reportes pendientes!</p>
+             <p className="text-neutral-500 font-medium">No hay ningún reporte en este momento.</p>
           </div>
         )}
       </div>

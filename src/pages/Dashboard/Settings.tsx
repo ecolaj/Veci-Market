@@ -4,7 +4,8 @@ import { LogOut, User, Shield, BookOpen, ChevronRight, AlertTriangle, X, Bell, B
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import ThemeToggle from '../../components/ThemeToggle';
-import { requestNotificationPermission } from '../../lib/firebase';
+import { requestNotificationPermission, db } from '../../lib/firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { cn } from '../../lib/utils';
 
 export default function Settings() {
@@ -14,12 +15,23 @@ export default function Settings() {
   const [notificationPerm, setNotificationPerm] = useState<NotificationPermission>(
     'Notification' in window ? Notification.permission : 'denied'
   );
+  const [pendingReportsCount, setPendingReportsCount] = useState(0);
 
   useEffect(() => {
     if ('Notification' in window) {
       setNotificationPerm(Notification.permission);
     }
   }, []);
+
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      const q = query(collection(db, 'reports'), where('status', '==', 'pending'));
+      const unsub = onSnapshot(q, (snap) => {
+        setPendingReportsCount(snap.docs.length);
+      });
+      return () => unsub();
+    }
+  }, [user?.role]);
 
   const handleToggleNotification = async () => {
     if (!('Notification' in window)) {
@@ -75,14 +87,19 @@ export default function Settings() {
       <h1 className="text-2xl font-black text-neutral-800">Ajustes</h1>
 
       <div className="bg-white rounded-[32px] overflow-hidden border border-neutral-100 shadow-sm">
-        {user.role === 'admin' && (
+        {user?.role === 'admin' && (
           <div 
             onClick={() => navigate('/dashboard/reports')}
-            className="flex items-center justify-between p-6 hover:bg-red-50 cursor-pointer transition-colors border-b border-neutral-100 sm:hidden"
+            className="flex items-center justify-between p-6 hover:bg-red-50 cursor-pointer transition-colors border-b border-neutral-100 sm:hidden relative"
           >
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center relative">
                 <ShieldAlert className="w-5 h-5" />
+                {pendingReportsCount > 0 && (
+                  <div className="absolute -top-1 -right-1 flex items-center justify-center min-w-[20px] h-5 px-1 bg-red-500 text-white text-[10px] font-black rounded-full border-2 border-white shadow-sm">
+                    {pendingReportsCount}
+                  </div>
+                )}
               </div>
               <div>
                 <h3 className="font-bold text-red-600">Admin Reportes</h3>

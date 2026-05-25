@@ -2,12 +2,26 @@ import { Outlet, NavLink, Navigate, useNavigate } from 'react-router-dom';
 import { useAuthStore, useAppStore } from '../../store';
 import { LayoutDashboard, Inbox as InboxIcon, BarChart3, LogOut, Package, UserCircle, Settings, ShieldAlert } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { useEffect, useState } from 'react';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 
 export default function DashboardLayout() {
   const { isAuthenticated, user, logout } = useAuthStore();
   const navigate = useNavigate();
   const orders = useAppStore(state => state.orders);
+  const [pendingReportsCount, setPendingReportsCount] = useState(0);
   
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      const q = query(collection(db, 'reports'), where('status', '==', 'pending'));
+      const unsub = onSnapshot(q, (snap) => {
+        setPendingReportsCount(snap.docs.length);
+      });
+      return () => unsub();
+    }
+  }, [user?.role]);
+
   if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
   }
@@ -35,6 +49,11 @@ export default function DashboardLayout() {
               >
                 <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
                 <span className="text-red-600">Admin Reportes</span>
+                {pendingReportsCount > 0 && (
+                  <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full ml-auto sm:ml-1">
+                    {pendingReportsCount}
+                  </span>
+                )}
               </NavLink>
             )}
             <NavLink 

@@ -178,7 +178,21 @@ export default function ProfileSettings() {
               <label className="block text-sm font-medium mb-1 text-neutral-700">Sector / Colonia *</label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-neutral-400" />
-                <input value={formData.sector} onChange={e => setFormData({...formData, sector: e.target.value})} className="w-full pl-10 p-2.5 border border-neutral-300 rounded-lg outline-none focus:border-emerald-500" required />
+                <select 
+                  value={formData.sector} 
+                  onChange={e => setFormData({...formData, sector: e.target.value})} 
+                  className="w-full pl-10 p-2.5 border border-neutral-300 rounded-lg outline-none focus:border-emerald-500 appearance-none bg-white" 
+                  required
+                >
+                  <option value="" disabled>Selecciona un sector</option>
+                  <option value="Parque 01">Parque 01</option>
+                  <option value="Parque 02">Parque 02</option>
+                  <option value="Parque 03">Parque 03</option>
+                  <option value="Parque 04">Parque 04</option>
+                  <option value="Parque 05">Parque 05</option>
+                  <option value="Andana 01">Andana 01</option>
+                  <option value="Andana 02">Andana 02</option>
+                </select>
               </div>
             </div>
             <div>

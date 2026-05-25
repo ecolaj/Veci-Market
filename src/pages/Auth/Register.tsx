@@ -217,12 +217,21 @@ export default function Register() {
           <form onSubmit={handleStep2Submit} className="space-y-4">
             <div>
               <label className="block text-sm font-bold text-neutral-700 mb-2">Sector / Colonia *</label>
-              <input 
+              <select 
                 value={formData.sector}
                 onChange={e => setFormData({...formData, sector: e.target.value})}
                 className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-2xl focus:ring-2 focus:ring-emerald-400 outline-none font-medium"
                 required
-              />
+              >
+                <option value="" disabled>Selecciona un sector</option>
+                <option value="Parque 01">Parque 01</option>
+                <option value="Parque 02">Parque 02</option>
+                <option value="Parque 03">Parque 03</option>
+                <option value="Parque 04">Parque 04</option>
+                <option value="Parque 05">Parque 05</option>
+                <option value="Andana 01">Andana 01</option>
+                <option value="Andana 02">Andana 02</option>
+              </select>
             </div>
             <div>
               <label className="block text-sm font-bold text-neutral-700 mb-2">No. Casa *</label>

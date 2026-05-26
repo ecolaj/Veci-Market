@@ -1,7 +1,7 @@
 {
-  "name": "FoodApp",
-  "short_name": "FoodApp",
-  "description": "Food ordering app",
+  "name": "VeciMarket",
+  "short_name": "VeciMarket",
+  "description": "Tu mercado vecinal, compra y vende fácil.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

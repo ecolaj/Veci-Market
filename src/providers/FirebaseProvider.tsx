@@ -160,9 +160,49 @@ export default function FirebaseProvider({ children }: { children: React.ReactNo
   }, [setOrders]);
 
   if (!authInitialized) {
-    return <div className="h-screen w-screen flex items-center justify-center bg-neutral-50">
-      <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-    </div>;
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-neutral-50 space-y-6">
+        <div className="relative animate-bounce">
+          <svg 
+            viewBox="0 0 100 100" 
+            className="w-20 h-20 drop-shadow-xl"
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            {/* Speed lines */}
+            <path d="M 20 40 L 35 40" stroke="#373567" strokeWidth="6" strokeLinecap="round" />
+            <path d="M 12 50 L 30 50" stroke="#373567" strokeWidth="6" strokeLinecap="round" />
+            <path d="M 20 60 L 35 60" stroke="#373567" strokeWidth="6" strokeLinecap="round" />
+            
+            {/* Handle */}
+            <circle cx="28" cy="28" r="5" fill="#E8483B" />
+            <path d="M 28 28 L 30 30" stroke="#373567" strokeWidth="6" strokeLinecap="round" />
+            
+            {/* Cart frame */}
+            <path d="M 30 30 L 85 30 L 78 65 L 38 65 L 30 30 Z" stroke="#373567" strokeWidth="6" strokeLinejoin="round" fill="white" />
+            
+            {/* Cart inner lines (grid) */}
+            <path d="M 45 30 L 43 65" stroke="#373567" strokeWidth="4" strokeLinecap="round" />
+            <path d="M 60 30 L 58 65" stroke="#373567" strokeWidth="4" strokeLinecap="round" />
+            <path d="M 75 30 L 73 65" stroke="#373567" strokeWidth="4" strokeLinecap="round" />
+            
+            <path d="M 35 42 L 82 42" stroke="#373567" strokeWidth="4" strokeLinecap="round" />
+            <path d="M 37 54 L 80 54" stroke="#373567" strokeWidth="4" strokeLinecap="round" />
+            
+            {/* Wheels */}
+            <circle cx="45" cy="78" r="6" stroke="#373567" strokeWidth="4" fill="#6985C1" />
+            <circle cx="70" cy="78" r="6" stroke="#373567" strokeWidth="4" fill="#6985C1" />
+            
+            {/* Cart base frame to wheel */}
+            <path d="M 38 65 L 75 65" stroke="#373567" strokeWidth="6" strokeLinecap="round" />
+          </svg>
+        </div>
+        <div className="flex flex-col items-center">
+          <span className="text-xl font-black text-neutral-800 tracking-tight">Cargando <span className="animate-pulse">. . .</span></span>
+          <span className="text-sm font-medium text-neutral-500 mt-2">Preparando VeciMarket para ti</span>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;

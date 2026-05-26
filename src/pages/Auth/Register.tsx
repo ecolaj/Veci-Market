@@ -4,6 +4,8 @@ import { auth, googleProvider, db, handleFirestoreError, OperationType } from '.
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 
+import { PhoneAlertModal } from '../../components/PhoneAlertModal';
+
 export default function Register() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -12,6 +14,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(auth.currentUser ? 2 : 1);
   const [error, setError] = useState('');
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
   
   // Step 1: Email/Password
   const [authData, setAuthData] = useState({
@@ -88,6 +91,11 @@ export default function Register() {
   const handleStep2Submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!auth.currentUser) return;
+    
+    if ((formData.phone && formData.phone.length !== 8) || (formData.secondary_phone && formData.secondary_phone.length !== 8)) {
+      setShowPhoneModal(true);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -276,6 +284,7 @@ export default function Register() {
           </form>
         )}
       </div>
+      <PhoneAlertModal isOpen={showPhoneModal} onClose={() => setShowPhoneModal(false)} />
     </div>
   );
 }

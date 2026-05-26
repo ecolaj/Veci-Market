@@ -26,6 +26,7 @@ import Manual from './pages/Manual';
 import InstallGuide from './pages/InstallGuide';
 import Privacy from './pages/Privacy';
 import PWAPrompt from './components/PWAPrompt';
+import AppLogo from './components/AppLogo';
 
 // Layout component
 function Layout() {
@@ -50,12 +51,12 @@ function Layout() {
   return (
     <div className="flex flex-col min-h-screen bg-neutral-50 text-neutral-900 font-sans">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-neutral-200 pt-safe box-content">
+      <header className="sticky top-0 z-50 bg-white border-b border-neutral-200 pt-safe font-sans shadow-sm">
         <div className="max-w-5xl mx-auto px-4 h-16 sm:h-20 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 font-bold text-xl tracking-tight">
-            <span className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-emerald-200">
-              V
-            </span>
+            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm border border-neutral-100 p-1">
+              <AppLogo className="w-full h-full" />
+            </div>
             <span className="text-2xl font-bold tracking-tight text-neutral-800">Veci<span className="text-emerald-500">Market</span></span>
           </Link>
 
@@ -169,7 +170,7 @@ function Layout() {
       <PWAPrompt />
 
       {/* Main Content */}
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 pt-[88px] sm:pt-[104px] pb-6 mb-16 sm:mb-0">
+      <main className="flex-1 max-w-5xl mx-auto w-full px-4 pt-6 md:pt-8 pb-6 mb-16 sm:mb-0">
         <Outlet />
       </main>
 

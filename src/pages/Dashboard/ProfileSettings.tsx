@@ -2,11 +2,13 @@ import React, { useState, useRef } from 'react';
 import { useAuthStore } from '../../store';
 import { User, Phone, MapPin, Edit3 } from 'lucide-react';
 import { services } from '../../lib/services';
+import { PhoneAlertModal } from '../../components/PhoneAlertModal';
 
 export default function ProfileSettings() {
   const { user, updateProfile } = useAuthStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
   
   if (!user) return null;
 
@@ -34,6 +36,12 @@ export default function ProfileSettings() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if ((formData.phone && formData.phone.length !== 8) || (formData.secondary_phone && formData.secondary_phone.length !== 8)) {
+      setShowPhoneModal(true);
+      return;
+    }
+    
     setLoading(true);
     try {
       await services.updateProfile(user.id, formData);
@@ -218,6 +226,8 @@ export default function ProfileSettings() {
           </div>
         </form>
       </div>
+
+      <PhoneAlertModal isOpen={showPhoneModal} onClose={() => setShowPhoneModal(false)} />
     </div>
   )
 }

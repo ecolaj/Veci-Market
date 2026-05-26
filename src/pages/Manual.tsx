@@ -6,7 +6,7 @@ export default function Manual() {
 
   return (
     <div className="bg-white min-h-screen">
-      <div className="sticky top-16 sm:top-20 z-40 bg-white/90 backdrop-blur-md border-b border-neutral-100 px-4 h-16 flex items-center gap-4 box-content -mx-4 mb-8">
+      <div className="sticky top-[calc(env(safe-area-inset-top)+4rem)] sm:top-[calc(env(safe-area-inset-top)+5rem)] z-40 bg-white/90 backdrop-blur-md border-b border-neutral-100 px-4 h-16 flex items-center gap-4 box-content -mx-4 mb-8">
         <button onClick={() => navigate(-1)} className="p-2 hover:bg-neutral-100 rounded-full transition-colors">
           <ArrowLeft className="w-6 h-6 text-neutral-600" />
         </button>

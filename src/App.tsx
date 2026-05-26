@@ -51,7 +51,7 @@ function Layout() {
   return (
     <div className="flex flex-col min-h-screen bg-neutral-50 text-neutral-900 font-sans">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-neutral-200 pt-safe font-sans shadow-sm">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-neutral-200 pt-safe font-sans shadow-sm">
         <div className="max-w-5xl mx-auto px-4 h-16 sm:h-20 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 font-bold text-xl tracking-tight">
             <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm border border-neutral-100 p-1">
@@ -170,7 +170,7 @@ function Layout() {
       <PWAPrompt />
 
       {/* Main Content */}
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 pt-6 md:pt-8 pb-6 mb-16 sm:mb-0">
+      <main className="flex-1 max-w-5xl mx-auto w-full px-4 pt-[calc(env(safe-area-inset-top)+5rem)] sm:pt-[calc(env(safe-area-inset-top)+6rem)] pb-6 mb-16 sm:mb-0">
         <Outlet />
       </main>
 

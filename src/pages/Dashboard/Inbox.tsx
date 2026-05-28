@@ -74,6 +74,9 @@ export default function Inbox() {
             const classified = classifieds.find(c => c.id === order.classified_id);
             const otherUser = users.find(u => u.id === (activeTab === 'sales' ? order.buyer_id : order.vendor_id));
             
+            const title = order.item_snapshot?.title || classified?.title || 'Producto Eliminado';
+            const price = order.item_snapshot?.price ?? classified?.price;
+            
             return (
               <div key={order.id} className={cn(
                 "bg-white p-6 rounded-[32px] border shadow-sm transition-colors",
@@ -87,8 +90,8 @@ export default function Inbox() {
                          hace {formatDistanceToNow(new Date(order.created_at), { locale: es })}
                        </span>
                     </div>
-                    <h3 className="font-black text-xl text-neutral-800">{classified?.title || 'Producto Eliminado'}</h3>
-                    <p className="text-emerald-500 font-black text-lg bg-emerald-50 mt-2 px-3 py-1 inline-block rounded-lg shadow-sm border border-emerald-100">{classified ? formatPrice(classified.price) : ''}</p>
+                    <h3 className="font-black text-xl text-neutral-800">{title}</h3>
+                    <p className="text-emerald-500 font-black text-lg bg-emerald-50 mt-2 px-3 py-1 inline-block rounded-lg shadow-sm border border-emerald-100">{price !== undefined ? formatPrice(price) : ''}</p>
                   </div>
                   
                   {activeTab === 'sales' && order.status === 'pending' && (

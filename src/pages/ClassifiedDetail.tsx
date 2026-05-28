@@ -70,6 +70,11 @@ export default function ClassifiedDetail() {
       vendor_id: item.vendor_id,
       delivery_address: `${user.sector} - Casa/Apto: ${user.house_number || 'N/A'}`,
       notes: notes,
+      item_snapshot: {
+        title: item.title,
+        price: item.price,
+        image_url: item.images?.[0] || item.image_url || undefined
+      }
     });
     
     setOrderSuccess(true);

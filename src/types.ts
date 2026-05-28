@@ -49,6 +49,11 @@ export interface Order {
   updated_at: string;
   delivery_address: string;
   notes?: string;
+  item_snapshot?: {
+    title: string;
+    price: number;
+    image_url?: string;
+  };
 }
 
 export interface Review {

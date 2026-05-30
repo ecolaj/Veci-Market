@@ -34,12 +34,53 @@ export default function Home() {
   const [startX, setStartX] = useState(0);
   const [scrollLeftState, setScrollLeftState] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [isInteracting, setIsInteracting] = useState(false);
+  const interactionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const trippledCategories = useMemo(() => {
     if (categories.length === 0) return [];
     return [...categories, ...categories, ...categories];
   }, [categories]);
 
+  // Handle scroll wrapping seamlessly for both user-scrolling and auto-scrolling
+  const handleScroll = () => {
+    const container = carouselRef.current;
+    if (!container) return;
+    const singleSetWidth = container.scrollWidth / 3;
+    if (singleSetWidth <= 0) return;
+
+    if (container.scrollLeft >= singleSetWidth * 2) {
+      container.scrollLeft -= singleSetWidth;
+    } else if (container.scrollLeft <= singleSetWidth / 2) {
+      container.scrollLeft += singleSetWidth;
+    }
+  };
+
+  // Center scroll position in the middle third on mount / category load
+  useEffect(() => {
+    const container = carouselRef.current;
+    if (!container) return;
+    
+    const timer = setTimeout(() => {
+      const singleSetWidth = container.scrollWidth / 3;
+      if (singleSetWidth > 0) {
+        container.scrollLeft = singleSetWidth;
+      }
+    }, 150);
+    
+    return () => clearTimeout(timer);
+  }, [categories]);
+
+  // Clean timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (interactionTimeoutRef.current) {
+        clearTimeout(interactionTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Auto scroll logic
   useEffect(() => {
     const container = carouselRef.current;
     if (!container) return;
@@ -48,14 +89,8 @@ export default function Home() {
     const speed = 0.65; // Moderate, smooth speed
 
     const scroll = () => {
-      if (!isHovered && !isMouseDown) {
+      if (!isHovered && !isMouseDown && !isInteracting) {
         container.scrollLeft += speed;
-
-        // Infinite wrap calculation
-        const singleSetWidth = container.scrollWidth / 3;
-        if (container.scrollLeft >= singleSetWidth) {
-          container.scrollLeft = container.scrollLeft % singleSetWidth;
-        }
       }
       animationFrameId = requestAnimationFrame(scroll);
     };
@@ -65,11 +100,28 @@ export default function Home() {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [isHovered, isMouseDown, categories]);
+  }, [isHovered, isMouseDown, isInteracting]);
+
+  const startInteraction = () => {
+    setIsInteracting(true);
+    if (interactionTimeoutRef.current) {
+      clearTimeout(interactionTimeoutRef.current);
+    }
+  };
+
+  const endInteraction = () => {
+    if (interactionTimeoutRef.current) {
+      clearTimeout(interactionTimeoutRef.current);
+    }
+    interactionTimeoutRef.current = setTimeout(() => {
+      setIsInteracting(false);
+    }, 3000); // Resume auto scroll after 3 seconds of peace
+  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const container = carouselRef.current;
     if (!container) return;
+    startInteraction();
     setIsMouseDown(true);
     setStartX(e.pageX - container.offsetLeft);
     setScrollLeftState(container.scrollLeft);
@@ -77,10 +129,13 @@ export default function Home() {
 
   const handleMouseLeave = () => {
     setIsMouseDown(false);
+    setIsHovered(false);
+    endInteraction();
   };
 
   const handleMouseUp = () => {
     setIsMouseDown(false);
+    endInteraction();
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -90,24 +145,30 @@ export default function Home() {
     e.preventDefault();
     const x = e.pageX - container.offsetLeft;
     const walk = (x - startX) * 1.5; // multiplier for dragging sensitivity
-    let newScrollLeft = scrollLeftState - walk;
-
-    const singleSetWidth = container.scrollWidth / 3;
-    if (newScrollLeft >= singleSetWidth) {
-      newScrollLeft = newScrollLeft % singleSetWidth;
-    } else if (newScrollLeft < 0) {
-      newScrollLeft = singleSetWidth + newScrollLeft;
-    }
-
-    container.scrollLeft = newScrollLeft;
+    container.scrollLeft = scrollLeftState - walk;
   };
 
-  const handleTouchStart = () => {
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const container = carouselRef.current;
+    if (!container) return;
+    startInteraction();
     setIsMouseDown(true);
+    setStartX(e.touches[0].pageX - container.offsetLeft);
+    setScrollLeftState(container.scrollLeft);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isMouseDown) return;
+    const container = carouselRef.current;
+    if (!container) return;
+    const x = e.touches[0].pageX - container.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    container.scrollLeft = scrollLeftState - walk;
   };
 
   const handleTouchEnd = () => {
     setIsMouseDown(false);
+    endInteraction();
   };
 
   const getAverageRating = (classifiedId: string) => {
@@ -150,6 +211,7 @@ export default function Home() {
               "flex gap-3 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] py-2 px-1 select-none cursor-grab active:cursor-grabbing",
               isMouseDown && "cursor-grabbing"
             )}
+            onScroll={handleScroll}
             onMouseDown={handleMouseDown}
             onMouseLeave={() => {
               handleMouseLeave();
@@ -158,6 +220,7 @@ export default function Home() {
             onMouseUp={handleMouseUp}
             onMouseMove={handleMouseMove}
             onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
             onMouseEnter={() => setIsHovered(true)}
           >

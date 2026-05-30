@@ -148,26 +148,11 @@ export default function Home() {
     container.scrollLeft = scrollLeftState - walk;
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    const container = carouselRef.current;
-    if (!container) return;
+  const handleTouchStart = () => {
     startInteraction();
-    setIsMouseDown(true);
-    setStartX(e.touches[0].pageX - container.offsetLeft);
-    setScrollLeftState(container.scrollLeft);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isMouseDown) return;
-    const container = carouselRef.current;
-    if (!container) return;
-    const x = e.touches[0].pageX - container.offsetLeft;
-    const walk = (x - startX) * 1.5;
-    container.scrollLeft = scrollLeftState - walk;
   };
 
   const handleTouchEnd = () => {
-    setIsMouseDown(false);
     endInteraction();
   };
 
@@ -220,9 +205,12 @@ export default function Home() {
             onMouseUp={handleMouseUp}
             onMouseMove={handleMouseMove}
             onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
-            onMouseEnter={() => setIsHovered(true)}
+            onMouseEnter={() => {
+              if (window.matchMedia('(hover: hover)').matches) {
+                setIsHovered(true);
+              }
+            }}
           >
             {trippledCategories.map((cat, i) => {
               const Icon = iconMap[cat.icon_name] || Store;

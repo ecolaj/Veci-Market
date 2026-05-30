@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { Utensils, ShoppingBag, Wrench, Shirt, Store, Star, Cake, Sparkles, Home as HomeIcon, PawPrint, Package, GraduationCap, Smartphone, Car, HeartPulse, Heart } from 'lucide-react';
 import { cn, formatPrice } from '../lib/utils';
 import { useAppStore, useAuthStore } from '../store';
@@ -28,6 +28,88 @@ export default function Home() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
 
+  // Carousel refs and states
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [isMouseDown, setIsMouseDown] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeftState, setScrollLeftState] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const trippledCategories = useMemo(() => {
+    if (categories.length === 0) return [];
+    return [...categories, ...categories, ...categories];
+  }, [categories]);
+
+  useEffect(() => {
+    const container = carouselRef.current;
+    if (!container) return;
+
+    let animationFrameId: number;
+    const speed = 0.65; // Moderate, smooth speed
+
+    const scroll = () => {
+      if (!isHovered && !isMouseDown) {
+        container.scrollLeft += speed;
+
+        // Infinite wrap calculation
+        const singleSetWidth = container.scrollWidth / 3;
+        if (container.scrollLeft >= singleSetWidth) {
+          container.scrollLeft = container.scrollLeft % singleSetWidth;
+        }
+      }
+      animationFrameId = requestAnimationFrame(scroll);
+    };
+
+    animationFrameId = requestAnimationFrame(scroll);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [isHovered, isMouseDown, categories]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    const container = carouselRef.current;
+    if (!container) return;
+    setIsMouseDown(true);
+    setStartX(e.pageX - container.offsetLeft);
+    setScrollLeftState(container.scrollLeft);
+  };
+
+  const handleMouseLeave = () => {
+    setIsMouseDown(false);
+  };
+
+  const handleMouseUp = () => {
+    setIsMouseDown(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isMouseDown) return;
+    const container = carouselRef.current;
+    if (!container) return;
+    e.preventDefault();
+    const x = e.pageX - container.offsetLeft;
+    const walk = (x - startX) * 1.5; // multiplier for dragging sensitivity
+    let newScrollLeft = scrollLeftState - walk;
+
+    const singleSetWidth = container.scrollWidth / 3;
+    if (newScrollLeft >= singleSetWidth) {
+      newScrollLeft = newScrollLeft % singleSetWidth;
+    } else if (newScrollLeft < 0) {
+      newScrollLeft = singleSetWidth + newScrollLeft;
+    }
+
+    container.scrollLeft = newScrollLeft;
+  };
+
+  const handleTouchStart = () => {
+    setIsMouseDown(true);
+  };
+
+  const handleTouchEnd = () => {
+    setIsMouseDown(false);
+  };
+
   const getAverageRating = (classifiedId: string) => {
     const itemReviews = reviews.filter(r => r.classified_id === classifiedId);
     if (itemReviews.length === 0) return 0;
@@ -50,28 +132,53 @@ export default function Home() {
   return (
     <div className="space-y-8">
       {/* Categories */}
-      <section>
+      <section className="relative group/section overflow-hidden">
         <h2 className="text-xl font-black mb-4 flex items-center gap-2 text-neutral-800">
           <Store className="w-5 h-5 text-neutral-400" />
           Categorías
         </h2>
-        <div className="grid grid-cols-6 gap-1.5 sm:gap-3">
-          {categories.map((cat) => {
-            const Icon = iconMap[cat.icon_name] || Store;
-            return (
-              <Link 
-                key={cat.id} 
-                to={`/search?category=${cat.id}`}
-                className={cn(
-                  "flex flex-col items-center justify-start p-1.5 sm:p-2.5 text-center rounded-xl transition-transform hover:scale-105 active:scale-95 shadow-sm border",
-                  cat.color
-                )}
-              >
-                <Icon className="w-4 h-4 sm:w-5 sm:h-5 mb-1 opacity-80" />
-                <span className="font-bold text-[7.5px] sm:text-[9px] tracking-tight leading-tight line-clamp-2">{cat.name}</span>
-              </Link>
-            )
-          })}
+        
+        {/* Carousel Container with gradient fade overflows */}
+        <div className="relative -mx-4 px-4 overflow-hidden">
+          {/* Left and right fade highlights to indicate more items */}
+          <div className="absolute top-0 bottom-0 left-0 w-8 bg-gradient-to-r from-neutral-50 to-transparent z-10 pointer-events-none" />
+          <div className="absolute top-0 bottom-0 right-0 w-8 bg-gradient-to-l from-neutral-50 to-transparent z-10 pointer-events-none" />
+
+          <div
+            ref={carouselRef}
+            className={cn(
+              "flex gap-3 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] py-2 px-1 select-none cursor-grab active:cursor-grabbing",
+              isMouseDown && "cursor-grabbing"
+            )}
+            onMouseDown={handleMouseDown}
+            onMouseLeave={() => {
+              handleMouseLeave();
+              setIsHovered(false);
+            }}
+            onMouseUp={handleMouseUp}
+            onMouseMove={handleMouseMove}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            onMouseEnter={() => setIsHovered(true)}
+          >
+            {trippledCategories.map((cat, i) => {
+              const Icon = iconMap[cat.icon_name] || Store;
+              return (
+                <Link 
+                  key={`${cat.id}-${i}`} 
+                  to={`/search?category=${cat.id}`}
+                  className={cn(
+                    "flex flex-col items-center justify-center p-3 sm:p-5 text-center rounded-[24px] sm:rounded-[32px] transition-all duration-300 hover:scale-105 active:scale-95 shadow-sm border shrink-0 w-[110px] h-[110px] sm:w-[140px] sm:h-[140px]",
+                    cat.color
+                  )}
+                  draggable={false}
+                >
+                  <Icon className="w-7 h-7 sm:w-10 sm:h-10 mb-2 opacity-90 transition-transform duration-300 group-hover:scale-110 shrink-0" />
+                  <span className="font-exrabold font-black text-[10.5px] sm:text-xs tracking-tight leading-snug line-clamp-2 select-none">{cat.name}</span>
+                </Link>
+              )
+            })}
+          </div>
         </div>
       </section>
 

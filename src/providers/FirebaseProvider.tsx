@@ -50,7 +50,7 @@ export default function FirebaseProvider({ children }: { children: React.ReactNo
               avatar_url: user.photoURL || '',
               sector: '',
               phone: '',
-              role: 'user', // default
+              role: 'buyer', // default
               saved_ads: [],
               created_at: new Date().toISOString()
             });

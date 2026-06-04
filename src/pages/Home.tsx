@@ -35,6 +35,7 @@ export default function Home() {
   const [scrollLeftState, setScrollLeftState] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isInteracting, setIsInteracting] = useState(false);
+  const isTouchingRef = useRef(false);
   const interactionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const trippledCategories = useMemo(() => {
@@ -90,6 +91,10 @@ export default function Home() {
 
     const scroll = () => {
       if (!isHovered && !isMouseDown && !isInteracting) {
+        const singleSetWidth = container.scrollWidth / 3;
+        if (container.scrollLeft === 0 && singleSetWidth > 0) {
+          container.scrollLeft = singleSetWidth;
+        }
         container.scrollLeft += speed;
       }
       animationFrameId = requestAnimationFrame(scroll);
@@ -119,6 +124,7 @@ export default function Home() {
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (isTouchingRef.current) return; // Prevent simulated mouse down events on touch devices
     const container = carouselRef.current;
     if (!container) return;
     startInteraction();
@@ -139,7 +145,7 @@ export default function Home() {
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isMouseDown) return;
+    if (!isMouseDown || isTouchingRef.current) return;
     const container = carouselRef.current;
     if (!container) return;
     e.preventDefault();
@@ -149,11 +155,15 @@ export default function Home() {
   };
 
   const handleTouchStart = () => {
+    isTouchingRef.current = true;
     startInteraction();
   };
 
   const handleTouchEnd = () => {
     endInteraction();
+    setTimeout(() => {
+      isTouchingRef.current = false;
+    }, 1000); // Absorb potential delayed browser-simulated click/mouse events
   };
 
   const getAverageRating = (classifiedId: string) => {
@@ -192,6 +202,7 @@ export default function Home() {
 
           <div
             ref={carouselRef}
+            style={{ scrollBehavior: 'auto' }}
             className={cn(
               "flex gap-3 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] py-2 px-1 select-none cursor-grab active:cursor-grabbing",
               isMouseDown && "cursor-grabbing"
@@ -219,13 +230,13 @@ export default function Home() {
                   key={`${cat.id}-${i}`} 
                   to={`/search?category=${cat.id}`}
                   className={cn(
-                    "flex flex-col items-center justify-center p-3 sm:p-5 text-center rounded-[24px] sm:rounded-[32px] transition-all duration-300 hover:scale-105 active:scale-95 shadow-sm border shrink-0 w-[110px] h-[110px] sm:w-[140px] sm:h-[140px]",
+                    "flex flex-col items-center justify-center p-2 sm:p-3.5 text-center rounded-[18px] sm:rounded-[24px] transition-all duration-300 hover:scale-105 active:scale-95 shadow-sm border shrink-0 w-[82px] h-[82px] sm:w-[105px] sm:h-[105px]",
                     cat.color
                   )}
                   draggable={false}
                 >
-                  <Icon className="w-7 h-7 sm:w-10 sm:h-10 mb-2 opacity-90 transition-transform duration-300 group-hover:scale-110 shrink-0" />
-                  <span className="font-exrabold font-black text-[10.5px] sm:text-xs tracking-tight leading-snug line-clamp-2 select-none">{cat.name}</span>
+                  <Icon className="w-[21px] h-[21px] sm:w-[30px] sm:h-[30px] mb-1.5 opacity-90 transition-transform duration-300 group-hover:scale-110 shrink-0" />
+                  <span className="font-black text-[8.5px] sm:text-[10px] tracking-tight leading-none line-clamp-2 select-none">{cat.name}</span>
                 </Link>
               )
             })}

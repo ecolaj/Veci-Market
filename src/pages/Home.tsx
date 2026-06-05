@@ -37,6 +37,7 @@ export default function Home() {
   const [isInteracting, setIsInteracting] = useState(false);
   const isTouchingRef = useRef(false);
   const interactionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollPosRef = useRef(0);
 
   const trippledCategories = useMemo(() => {
     if (categories.length === 0) return [];
@@ -52,8 +53,15 @@ export default function Home() {
 
     if (container.scrollLeft >= singleSetWidth * 2) {
       container.scrollLeft -= singleSetWidth;
+      scrollPosRef.current = container.scrollLeft;
     } else if (container.scrollLeft <= singleSetWidth / 2) {
       container.scrollLeft += singleSetWidth;
+      scrollPosRef.current = container.scrollLeft;
+    } else {
+      // Keep scrollPosRef synced with manual scrolling and momentum
+      if (isMouseDown || isInteracting) {
+        scrollPosRef.current = container.scrollLeft;
+      }
     }
   };
 
@@ -66,6 +74,7 @@ export default function Home() {
       const singleSetWidth = container.scrollWidth / 3;
       if (singleSetWidth > 0) {
         container.scrollLeft = singleSetWidth;
+        scrollPosRef.current = singleSetWidth;
       }
     }, 150);
     
@@ -94,8 +103,13 @@ export default function Home() {
         const singleSetWidth = container.scrollWidth / 3;
         if (container.scrollLeft === 0 && singleSetWidth > 0) {
           container.scrollLeft = singleSetWidth;
+          scrollPosRef.current = singleSetWidth;
         }
-        container.scrollLeft += speed;
+        
+        // Accumulate fractional value to bypass Safari WebKit integer-rounding scroll bug
+        scrollPosRef.current += speed;
+        // Set the rounded integer so iOS registered changes correctly
+        container.scrollLeft = Math.round(scrollPosRef.current);
       }
       animationFrameId = requestAnimationFrame(scroll);
     };
@@ -152,6 +166,7 @@ export default function Home() {
     const x = e.pageX - container.offsetLeft;
     const walk = (x - startX) * 1.5; // multiplier for dragging sensitivity
     container.scrollLeft = scrollLeftState - walk;
+    scrollPosRef.current = container.scrollLeft;
   };
 
   const handleTouchStart = () => {

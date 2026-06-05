@@ -220,7 +220,7 @@ function Layout() {
       </nav>
 
       {isAuthenticated && (
-        <Link to="/publish" className="sm:hidden fixed bottom-20 right-4 z-50 bg-emerald-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-transform border border-emerald-400">
+        <Link to="/publish" className="sm:hidden fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom,0px))] right-4 z-50 bg-emerald-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-transform border border-emerald-400">
           <Plus className="w-6 h-6" />
         </Link>
       )}

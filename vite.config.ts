@@ -15,7 +15,8 @@ export default defineConfig(({mode}) => {
         workbox: {
           cleanupOutdatedCaches: true,
           clientsClaim: true,
-          skipWaiting: true
+          skipWaiting: true,
+          importScripts: ['/firebase-messaging-sw.js']
         },
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
         manifest: {

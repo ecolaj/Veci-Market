@@ -14,7 +14,9 @@ export default function FirebaseProvider({ children }: { children: React.ReactNo
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
         // Handle Notifications
-        requestNotificationPermission(user.uid);
+        if ('Notification' in window && Notification.permission === 'granted') {
+          requestNotificationPermission(user.uid);
+        }
 
         // Fetch custom user doc
         const unsubUserDoc = onSnapshot(doc(db, 'users', user.uid), async (userDoc) => {

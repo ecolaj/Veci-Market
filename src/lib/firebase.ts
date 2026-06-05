@@ -26,7 +26,21 @@ export async function requestNotificationPermission(userId?: string) {
   try {
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
+      let registration: ServiceWorkerRegistration | undefined;
+      if ('serviceWorker' in navigator) {
+        try {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          registration = registrations.find(r => r.active && (r.active.scriptURL.includes('sw.js') || r.active.scriptURL.includes('firebase-messaging-sw.js')));
+          if (!registration) {
+            registration = await navigator.serviceWorker.register('/sw.js');
+          }
+        } catch (swErr) {
+          console.warn("Could not retrieve active service worker registration", swErr);
+        }
+      }
+
       const currentToken = await getToken(messaging, { 
+        serviceWorkerRegistration: registration,
         vapidKey: (import.meta as any).env.VITE_FIREBASE_VAPID_KEY || undefined
       });
       if (currentToken) {

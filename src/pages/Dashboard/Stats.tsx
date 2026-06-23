@@ -8,22 +8,66 @@ export default function Stats() {
   const { user } = useAuthStore();
   const { orders, classifieds, users } = useAppStore();
   const [showChart, setShowChart] = useState(false);
+  const [selectedYear, setSelectedYear] = useState<string>('todos');
+  const [selectedMonth, setSelectedMonth] = useState<string>('todos');
 
   if (!user) return null;
 
-  // Filter valid delivered orders for this vendor
+  // Filter valid delivered/cancelled orders for this vendor
   const myOrders = orders.filter(o => o.vendor_id === user.id);
   const myDeliveredOrders = myOrders.filter(o => o.status === 'delivered');
   const myCancelledOrders = myOrders.filter(o => o.status === 'cancelled');
 
-  // Calculate Total Sales
-  const totalSales = myDeliveredOrders.reduce((sum, order) => {
+  // Dynamic Year choices based on vendor orders
+  const years = Array.from(new Set(myOrders.map(o => {
+    try {
+      return new Date(o.created_at).getFullYear();
+    } catch {
+      return null;
+    }
+  }).filter((y): y is number => y !== null))).sort((a, b) => b - a);
+
+  const currentYear = new Date().getFullYear();
+  const yearOptions = years.length > 0 ? years : [currentYear];
+
+  const months = [
+    { value: '0', label: 'Enero' },
+    { value: '1', label: 'Febrero' },
+    { value: '2', label: 'Marzo' },
+    { value: '3', label: 'Abril' },
+    { value: '4', label: 'Mayo' },
+    { value: '5', label: 'Junio' },
+    { value: '6', label: 'Julio' },
+    { value: '7', label: 'Agosto' },
+    { value: '8', label: 'Septiembre' },
+    { value: '9', label: 'Octubre' },
+    { value: '10', label: 'Noviembre' },
+    { value: '11', label: 'Diciembre' },
+  ];
+
+  // Apply Filters to delivered/cancelled orders
+  const filteredDeliveredOrders = myDeliveredOrders.filter(order => {
+    const d = new Date(order.created_at);
+    if (selectedYear !== 'todos' && String(d.getFullYear()) !== selectedYear) return false;
+    if (selectedMonth !== 'todos' && String(d.getMonth()) !== selectedMonth) return false;
+    return true;
+  });
+
+  const filteredCancelledOrders = myCancelledOrders.filter(order => {
+    const d = new Date(order.created_at);
+    if (selectedYear !== 'todos' && String(d.getFullYear()) !== selectedYear) return false;
+    if (selectedMonth !== 'todos' && String(d.getMonth()) !== selectedMonth) return false;
+    return true;
+  });
+
+  // Calculate Total Sales for filtered period
+  const totalSales = filteredDeliveredOrders.reduce((sum, order) => {
     const item = classifieds.find(c => c.id === order.classified_id);
     return sum + (order.item_snapshot?.price ?? item?.price ?? 0);
   }, 0);
 
-  // Calculate Top Customers
-  const customerCounts = myDeliveredOrders.reduce((acc, order) => {
+  // Calculate Top Customers for filtered period
+  const customerCounts = filteredDeliveredOrders.reduce((acc, order) => {
     acc[order.buyer_id] = (acc[order.buyer_id] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
@@ -41,8 +85,8 @@ export default function Stats() {
       };
     });
 
-  // Calculate Most Sold Product
-  const productCounts = myDeliveredOrders.reduce((acc, order) => {
+  // Calculate Most Sold Product for filtered period
+  const productCounts = filteredDeliveredOrders.reduce((acc, order) => {
     acc[order.classified_id] = (acc[order.classified_id] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
@@ -52,7 +96,7 @@ export default function Stats() {
     .map(([id, count]) => {
       let item: any = classifieds.find(c => c.id === id);
       if (!item) {
-        const snapshot = myDeliveredOrders.find(o => o.classified_id === id)?.item_snapshot;
+        const snapshot = filteredDeliveredOrders.find(o => o.classified_id === id)?.item_snapshot;
         item = {
           id,
           title: snapshot?.title || 'Producto Eliminado',
@@ -63,14 +107,28 @@ export default function Stats() {
       return { item, count };
     });
 
-  // Chart Data
-  const chartDataMapWithKeys = myDeliveredOrders.reduce((acc, order) => {
+  // Chart Data: dynamic grouping based on whether a single month is filtered
+  const isMonthFiltered = selectedMonth !== 'todos';
+
+  const chartDataMapWithKeys = filteredDeliveredOrders.reduce((acc, order) => {
     const date = new Date(order.created_at);
-    const sortKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    const displayMonth = date.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' }).replace('.', '');
+    let sortKey = '';
+    let displayName = '';
+    
+    if (isMonthFiltered) {
+      // Group by day of the month
+      const day = date.getDate();
+      sortKey = String(day).padStart(2, '0');
+      displayName = `Día ${day}`;
+    } else {
+      // Group by month
+      sortKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const displayMonth = date.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' }).replace('.', '');
+      displayName = displayMonth.charAt(0).toUpperCase() + displayMonth.slice(1);
+    }
     
     if (!acc[sortKey]) {
-      acc[sortKey] = { name: displayMonth.charAt(0).toUpperCase() + displayMonth.slice(1), total: 0, sortKey };
+      acc[sortKey] = { name: displayName, total: 0, sortKey };
     }
     const item = classifieds.find(c => c.id === order.classified_id);
     acc[sortKey].total += (order.item_snapshot?.price ?? item?.price ?? 0);
@@ -83,9 +141,53 @@ export default function Stats() {
     return `Q. ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
+  const formatYAxisTick = (value: number) => {
+    if (value >= 1000000) {
+      return `Q. ${(value / 1000000).toFixed(1).replace(/\.0$/, '')}M`;
+    }
+    if (value >= 1000) {
+      return `Q. ${(value / 1000).toFixed(1).replace(/\.0$/, '')}K`;
+    }
+    return `Q. ${value}`;
+  };
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-black text-neutral-800">Mis Estadísticas</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h1 className="text-2xl font-black text-neutral-800">Mis Estadísticas</h1>
+        
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Year Selector */}
+          <div className="relative">
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              className="appearance-none bg-white border border-neutral-200 text-neutral-700 font-semibold px-4 py-2 pr-10 rounded-2xl shadow-sm hover:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm cursor-pointer"
+            >
+              <option value="todos">Todos los años</option>
+              {yearOptions.map(y => (
+                <option key={y} value={String(y)}>{y}</option>
+              ))}
+            </select>
+            <ChevronDown className="w-4 h-4 text-neutral-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+
+          {/* Month Selector */}
+          <div className="relative">
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="appearance-none bg-white border border-neutral-200 text-neutral-700 font-semibold px-4 py-2 pr-10 rounded-2xl shadow-sm hover:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm cursor-pointer"
+            >
+              <option value="todos">Todos los meses</option>
+              {months.map(m => (
+                <option key={m.value} value={m.value}>{m.label}</option>
+              ))}
+            </select>
+            <ChevronDown className="w-4 h-4 text-neutral-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
         {/* Total Sales */}
@@ -110,7 +212,7 @@ export default function Stats() {
               <h3 className="font-bold text-neutral-800 mb-4 sm:mb-6 text-sm sm:text-base">Progresión de Ventas</h3>
               {chartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData} margin={{ top: 5, right: 10, bottom: 25, left: -20 }}>
+                  <LineChart data={chartData} margin={{ top: 10, right: 15, bottom: 25, left: 10 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E5E5" />
                     <XAxis 
                       dataKey="name" 
@@ -123,8 +225,8 @@ export default function Stats() {
                       axisLine={false}
                       tickLine={false}
                       tick={{ fill: '#A3A3A3', fontSize: 11, fontWeight: 600 }}
-                      tickFormatter={formatChartCurrency}
-                      width={80}
+                      tickFormatter={formatYAxisTick}
+                      width={65}
                     />
                     <Tooltip 
                       cursor={{ stroke: '#10B981', strokeWidth: 1, strokeDasharray: '4 4' }}
@@ -145,7 +247,7 @@ export default function Stats() {
                 </ResponsiveContainer>
               ) : (
                 <div className="h-[200px] flex items-center justify-center text-neutral-400 font-medium text-sm text-center">
-                  No hay datos para mostrar
+                  No hay datos para mostrar en este periodo
                 </div>
               )}
             </div>
@@ -157,7 +259,7 @@ export default function Stats() {
             <span className="font-bold text-neutral-400 uppercase tracking-wider text-xs">Pedidos Completados</span>
             <Package className="w-5 h-5 text-neutral-300" />
           </div>
-          <p className="text-4xl font-black text-neutral-800">{myDeliveredOrders.length}</p>
+          <p className="text-4xl font-black text-neutral-800">{filteredDeliveredOrders.length}</p>
         </div>
 
         <div className="bg-white p-6 rounded-[32px] border border-neutral-100 shadow-sm flex flex-col justify-between h-40">
@@ -165,7 +267,7 @@ export default function Stats() {
             <span className="font-bold text-red-400 uppercase tracking-wider text-xs">Pedidos Rechazados</span>
             <XCircle className="w-5 h-5 text-red-200" />
           </div>
-          <p className="text-4xl font-black text-neutral-800">{myCancelledOrders.length}</p>
+          <p className="text-4xl font-black text-neutral-800">{filteredCancelledOrders.length}</p>
         </div>
       </div>
 

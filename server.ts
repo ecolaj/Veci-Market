@@ -55,7 +55,7 @@ async function startServer() {
       let badgeCount = 1;
       if (vendorId) {
         try {
-          const db = admin.firestore();
+          const db = getFirestore(firebaseConfig.firestoreDatabaseId || "(default)");
           const ordersSnapshot = await db.collection("orders")
             .where("vendor_id", "==", vendorId)
             .where("status", "==", "pending")

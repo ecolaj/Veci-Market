@@ -119,7 +119,7 @@ function Layout() {
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: -100, opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-indigo-500/95 backdrop-blur-md border border-indigo-500/50 px-5 py-4 rounded-[20px] shadow-2xl flex items-center justify-between text-white w-full max-w-md pointer-events-auto"
+              className="bg-gradient-to-r from-indigo-600/80 via-indigo-500/80 to-purple-600/80 backdrop-blur-lg border border-indigo-500/30 px-5 py-4 rounded-[20px] shadow-2xl shadow-indigo-500/10 flex items-center justify-between text-white w-full max-w-md pointer-events-auto"
             >
               <div className="flex items-center gap-3 font-medium text-sm">
                 <div className="bg-white/20 p-2 rounded-full shrink-0">
@@ -147,7 +147,7 @@ function Layout() {
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: -100, opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-red-500/95 backdrop-blur-md border border-red-500/50 px-5 py-4 rounded-[20px] shadow-2xl shadow-red-500/20 flex items-center justify-between text-white w-full max-w-md pointer-events-auto"
+              className="bg-gradient-to-r from-red-600/80 via-rose-500/80 to-red-600/80 backdrop-blur-lg border border-red-500/30 px-5 py-4 rounded-[20px] shadow-2xl shadow-red-500/25 flex items-center justify-between text-white w-full max-w-md pointer-events-auto"
             >
               <div className="flex items-center gap-3 font-medium text-sm">
                 <div className="bg-white/20 p-2 rounded-full shrink-0">

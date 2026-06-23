@@ -2,7 +2,7 @@ import { useAuthStore } from '../../store';
 import { services } from '../../lib/services';
 import { LogOut, User, Shield, BookOpen, ChevronRight, AlertTriangle, X, Bell, BellOff, ShieldAlert, DownloadCloud } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import ThemeToggle from '../../components/ThemeToggle';
 import { requestNotificationPermission, db } from '../../lib/firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
@@ -16,6 +16,7 @@ export default function Settings() {
     'Notification' in window ? Notification.permission : 'denied'
   );
   const [pendingReportsCount, setPendingReportsCount] = useState(0);
+  const [testingPush, setTestingPush] = useState(false);
 
   useEffect(() => {
     if ('Notification' in window) {
@@ -28,6 +29,8 @@ export default function Settings() {
       const q = query(collection(db, 'reports'), where('status', '==', 'pending'));
       const unsub = onSnapshot(q, (snap) => {
         setPendingReportsCount(snap.docs.length);
+      }, (error) => {
+        console.warn("Could not subscribe to pending reports (likely permission issue or non-admin):", error);
       });
       return () => unsub();
     }
@@ -73,6 +76,46 @@ export default function Settings() {
       }
     } else {
       alert("Debes permitir las notificaciones en tu navegador/móvil para recibir alertas.");
+    }
+  };
+
+  const handleSendTestPush = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (testingPush) return;
+    setTestingPush(true);
+    try {
+      const { doc, getDoc } = await import('firebase/firestore');
+      const userDoc = await getDoc(doc(db, 'users', user.id));
+      const tokens = userDoc.exists() ? (userDoc.data()?.fcm_tokens || []) : [];
+      
+      if (tokens.length === 0) {
+        alert("No se encontraron tokens FCM registrados para tu cuenta en este navegador. Intenta desinstalar/instalar el acceso directo de tu PWA y vuelve a activar las notificaciones para volver a generarlo.");
+        setTestingPush(false);
+        return;
+      }
+      
+      const res = await fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vendorId: user.id,
+          tokens,
+          title: "¡Prueba de VeciMarket!",
+          body: "Esta es una notificación push de prueba real en tiempo de ejecución. ¡Tu PWA funciona perfectamente!",
+          data: { url: '/dashboard/settings' }
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(`¡Notificación enviada con éxito! Revisa la pantalla de tu móvil.`);
+      } else {
+        alert(`Error al enviar: ${data.error || 'Desconocido'}`);
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(`Error de red o conexión: ${err.message}`);
+    } finally {
+      setTestingPush(false);
     }
   };
 
@@ -141,7 +184,7 @@ export default function Settings() {
               <div>
                 <h3 className="font-bold text-neutral-800">Notificaciones PWA</h3>
                 <p className="text-xs text-neutral-500">
-                  {notificationPerm === 'granted' ? "Activas - click para probar" : "Desactivadas - click para activar"}
+                  {notificationPerm === 'granted' ? "Activas" : "Desactivadas - click para activar"}
                 </p>
               </div>
             </div>
@@ -151,6 +194,26 @@ export default function Settings() {
               <div className={cn("w-4 h-4 bg-white rounded-full shadow-sm transition-transform", notificationPerm === 'granted' ? "translate-x-6" : "translate-x-0")} />
             </div>
           </div>
+
+          {notificationPerm === 'granted' && (
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                disabled={testingPush}
+                onClick={handleSendTestPush}
+                className="w-full text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-800 transition-colors py-3.5 px-4 rounded-2xl text-xs font-black shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {testingPush ? (
+                  <>
+                    <div className="w-3.5 h-3.5 rounded-full border-2 border-indigo-200 border-t-indigo-700 animate-spin" />
+                    Enviando prueba...
+                  </>
+                ) : (
+                  "Probar notificación push real (FCM)"
+                )}
+              </button>
+            </div>
+          )}
           
           <div className="mt-4 p-3 bg-blue-50 text-blue-800 rounded-xl text-[10px] sm:text-xs">
             <strong>Nota sobre iOS/Móviles:</strong> Para que las notificaciones funcionen completamente en segundo plano cuando la app está cerrada, los navegadores y sistemas operativos (especialmente iOS) requieren servicios adicionales u opciones directas en <span className="font-bold">Ajustes &gt; Safari / Web</span> de tu dispositivo. Asegúrate de añadirla a la pantalla de inicio.

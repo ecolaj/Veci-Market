@@ -30,12 +30,12 @@ export async function requestNotificationPermission(userId?: string) {
       if ('serviceWorker' in navigator) {
         try {
           const registrations = await navigator.serviceWorker.getRegistrations();
-          registration = registrations.find(r => r.active && (r.active.scriptURL.includes('sw.js') || r.active.scriptURL.includes('firebase-messaging-sw.js')));
-          if (!registration) {
-            registration = await navigator.serviceWorker.register('/sw.js');
+          if (registrations.length === 0) {
+            await navigator.serviceWorker.register('/sw.js');
           }
+          registration = await navigator.serviceWorker.ready;
         } catch (swErr) {
-          console.warn("Could not retrieve active service worker registration", swErr);
+          console.warn("Could not retrieve ready service worker registration", swErr);
         }
       }
 

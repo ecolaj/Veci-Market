@@ -20,17 +20,21 @@ export default function ProfileSettings() {
     house_number: user.house_number || '',
     avatar_url: user.avatar_url || ''
   });
+  const [isInitialized, setIsInitialized] = useState(false);
 
   React.useEffect(() => {
-    setFormData(prev => ({
-      display_name: user.display_name || prev.display_name,
-      phone: user.phone || prev.phone,
-      secondary_phone: user.secondary_phone || prev.secondary_phone,
-      sector: user.sector || prev.sector,
-      house_number: user.house_number || prev.house_number,
-      avatar_url: user.avatar_url || prev.avatar_url
-    }));
-  }, [user.display_name, user.phone, user.secondary_phone, user.sector, user.house_number, user.avatar_url]);
+    if (user && !isInitialized) {
+      setFormData({
+        display_name: user.display_name || '',
+        phone: user.phone || '',
+        secondary_phone: user.secondary_phone || '',
+        sector: user.sector || '',
+        house_number: user.house_number || '',
+        avatar_url: user.avatar_url || ''
+      });
+      setIsInitialized(true);
+    }
+  }, [user, isInitialized]);
 
   const [saved, setSaved] = useState(false);
 
@@ -193,6 +197,9 @@ export default function ProfileSettings() {
                   required
                 >
                   <option value="" disabled>Selecciona un sector</option>
+                  {user.sector && !["Parque 01", "Parque 02", "Parque 03", "Parque 04", "Parque 05", "Andana 01", "Andana 02"].includes(user.sector) && (
+                    <option value={user.sector}>{user.sector} (Actual en BD)</option>
+                  )}
                   <option value="Parque 01">Parque 01</option>
                   <option value="Parque 02">Parque 02</option>
                   <option value="Parque 03">Parque 03</option>

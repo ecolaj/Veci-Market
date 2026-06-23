@@ -111,26 +111,6 @@ export default function FirebaseProvider({ children }: { children: React.ReactNo
         const unsubOrders = onSnapshot(
           query(collection(db, 'orders'), or(where('buyer_id', '==', user.uid), where('vendor_id', '==', user.uid))),
           (snapshot) => {
-            let hasNewOrders = false;
-            let newOrderTitle = "";
-            let newOrderBody = "";
-            
-            snapshot.docChanges().forEach((change) => {
-               if (change.type === 'added') {
-                  const data = change.doc.data();
-                  // Only vendors get notifications for pending orders
-                  if (data.status === 'pending' && data.vendor_id === user.uid) {
-                     const created = new Date(data.created_at).getTime();
-                     const now = new Date().getTime();
-                     if (now - created < 15000) { 
-                       hasNewOrders = true;
-                       newOrderTitle = `Nuevo pedido de ${data.delivery_address || 'un cliente'}`;
-                       newOrderBody = `Tienes 1 nuevo pedido pendiente.`;
-                     }
-                  }
-               }
-            });
-
             // We can now safely overwrite all orders without worrying about merging!
             setOrders(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any)));
           },

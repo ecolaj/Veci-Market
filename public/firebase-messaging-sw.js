@@ -1,4 +1,12 @@
 // 1. Install raw push handler FIRST to ensure synchronous execution for iOS.
+self.addEventListener('install', function(event) {
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', function(event) {
+  event.waitUntil(self.clients.claim());
+});
+
 self.addEventListener('push', function(event) {
   let title = 'Nueva Notificación';
   let body = '';
@@ -8,11 +16,14 @@ self.addEventListener('push', function(event) {
   if (event.data) {
     try {
       const payload = event.data.json();
-      title = payload?.data?.title || payload?.notification?.title || title;
-      body = payload?.data?.body || payload?.notification?.body || body;
-      url = payload?.data?.url || payload?.fcmOptions?.link || url;
-      if (payload?.data?.badge) {
-        badgeCount = parseInt(payload.data.badge, 10) || 1;
+      // Robust payload parsing for nested or top-level properties
+      title = payload?.data?.title || payload?.notification?.title || payload?.title || title;
+      body = payload?.data?.body || payload?.notification?.body || payload?.body || body;
+      url = payload?.data?.url || payload?.fcmOptions?.link || payload?.url || url;
+      
+      const bVal = payload?.data?.badge || payload?.badge;
+      if (bVal) {
+        badgeCount = parseInt(bVal, 10) || 1;
       }
     } catch (e) {
       console.error('[SW] Parse push error', e);
@@ -26,27 +37,28 @@ self.addEventListener('push', function(event) {
     vibrate: [200, 100, 200]
   };
 
-  // Update badge immediately in background if supported
-  if (navigator && 'setAppBadge' in navigator) {
-    event.waitUntil(
-      navigator.setAppBadge(badgeCount).catch(function(err) {
+  // Promise for updating the badge count
+  const updateBadgePromise = (typeof navigator !== 'undefined' && 'setAppBadge' in navigator)
+    ? navigator.setAppBadge(badgeCount).catch(function(err) {
         console.warn("Error setting app badge in SW:", err);
       })
-    );
-  }
+    : Promise.resolve();
 
-  // Prevent duplicate notifications in foreground
+  // Promise for displaying the notification (only when app is in background)
+  const showNotificationPromise = clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+    const isForeground = clientList.some(function(client) {
+      return client.focused;
+    });
+    if (isForeground) {
+      console.log('[SW] App is in foreground, skipping native notification.');
+      return;
+    }
+    return self.registration.showNotification(title, options);
+  });
+
+  // Wait for both promises to complete to keep the service worker alive
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
-      const isForeground = clientList.some(function(client) {
-        return client.focused;
-      });
-      if (isForeground) {
-        console.log('[SW] App is in foreground, skipping native notification.');
-        return;
-      }
-      return self.registration.showNotification(title, options);
-    })
+    Promise.all([updateBadgePromise, showNotificationPromise])
   );
 });
 

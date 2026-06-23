@@ -48,6 +48,21 @@ function Layout() {
   // Count pending orders for vendor
   const pendingOrders = orders.filter(o => o.vendor_id === user?.id && o.status === 'pending').length;
 
+  // Actualizar el globito de notificación (App Badge API) en el icono de la PWA
+  useEffect(() => {
+    if (typeof navigator !== 'undefined' && 'setAppBadge' in navigator) {
+      if (pendingOrders > 0) {
+        (navigator as any).setAppBadge(pendingOrders).catch((err: any) => {
+          console.warn("Error setting app badge:", err);
+        });
+      } else {
+        (navigator as any).clearAppBadge().catch((err: any) => {
+          console.warn("Error clearing app badge:", err);
+        });
+      }
+    }
+  }, [pendingOrders]);
+
   return (
     <div className="flex flex-col min-h-screen bg-neutral-50 text-neutral-900 font-sans">
       {/* Header */}

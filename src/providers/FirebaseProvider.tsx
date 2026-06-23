@@ -57,6 +57,8 @@ export default function FirebaseProvider({ children }: { children: React.ReactNo
               created_at: new Date().toISOString()
             });
           }
+        }, (error) => {
+          console.error("Error subscribing to user doc:", error);
         });
         
         // Let's store the unsubscribe to call it when auth state changes or unmounts,
@@ -79,14 +81,20 @@ export default function FirebaseProvider({ children }: { children: React.ReactNo
   useEffect(() => {
     const unsubClassifieds = onSnapshot(collection(db, 'classifieds'), (snapshot) => {
       setClassifieds(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any)));
+    }, (error) => {
+      console.error("Error subscribing to classifieds collection:", error);
     });
 
     const unsubUsers = onSnapshot(collection(db, 'users'), (snapshot) => {
       setUsers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any)));
+    }, (error) => {
+      console.error("Error subscribing to users collection:", error);
     });
 
     const unsubReviews = onSnapshot(collection(db, 'reviews'), (snapshot) => {
       setReviews(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any)));
+    }, (error) => {
+      console.error("Error subscribing to reviews collection:", error);
     });
 
     return () => {
@@ -146,6 +154,9 @@ export default function FirebaseProvider({ children }: { children: React.ReactNo
 
             // We can now safely overwrite all orders without worrying about merging!
             setOrders(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any)));
+          },
+          (error) => {
+            console.error("Error subscribing to orders collection:", error);
           }
         );
 

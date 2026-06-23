@@ -47,15 +47,32 @@ export const handler: Handler = async (event, context) => {
     }
 
     const message = {
-      data: {
+      notification: {
         title: title || "Nueva Notificación",
-        body: body || "",
-        url: data?.url || '/'
+        body: body || ""
       },
+      data: data || {},
       tokens: tokens,
       webpush: {
         headers: {
           Urgency: "high"
+        },
+        notification: {
+          title: title || "Nueva Notificación",
+          body: body || "",
+          icon: '/icon.svg',
+          vibrate: [200, 100, 200]
+        },
+        fcmOptions: {
+          link: data?.url || '/'
+        }
+      },
+      apns: {
+        payload: {
+          aps: {
+            sound: "default",
+            badge: 1
+          }
         }
       }
     };

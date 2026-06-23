@@ -46,23 +46,24 @@ export const handler: Handler = async (event, context) => {
       };
     }
 
+    const stringifiedData: Record<string, string> = {
+      title: title || "Nueva Notificación",
+      body: body || "",
+      url: data?.url || '/'
+    };
+    if (data) {
+      for (const key of Object.keys(data)) {
+        stringifiedData[key] = String(data[key]);
+      }
+    }
+
     const message = {
-      notification: {
-        title: title || "Nueva Notificación",
-        body: body || ""
-      },
-      data: data || {},
+      data: stringifiedData,
       tokens: tokens,
       webpush: {
         headers: {
-          Urgency: "high",
+          Urgency: "high" as const,
           TTL: "86400"
-        },
-        notification: {
-          title: title || "Nueva Notificación",
-          body: body || "",
-          icon: '/icon.svg',
-          vibrate: [200, 100, 200]
         },
         fcmOptions: {
           link: data?.url || '/'
@@ -71,10 +72,6 @@ export const handler: Handler = async (event, context) => {
       android: {
         priority: "high" as const,
         ttl: 86400000, // 1 day
-        notification: {
-          sound: "default",
-          clickAction: "FLUTTER_NOTIFICATION_CLICK"
-        }
       },
       apns: {
         headers: {

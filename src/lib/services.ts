@@ -42,8 +42,21 @@ export const services = {
       // Call Express API to trigger native push notification
       try {
         const { getDoc } = await import('firebase/firestore');
-        const vendorDoc = await getDoc(doc(db, 'users', data.vendor_id));
+        const [vendorDoc, buyerDoc] = await Promise.all([
+          getDoc(doc(db, 'users', data.vendor_id)),
+          getDoc(doc(db, 'users', data.buyer_id))
+        ]);
+
         const tokens = vendorDoc.exists() ? (vendorDoc.data()?.fcm_tokens || []) : [];
+        
+        let buyerName = 'un vecino';
+        let buyerAddress = data.delivery_address;
+
+        if (buyerDoc.exists()) {
+          const bData = buyerDoc.data();
+          buyerName = bData.display_name || bData.name || 'un vecino';
+          buyerAddress = `${bData.sector || 'N/A'} - Casa: ${bData.house_number || 'N/A'}`;
+        }
         
         await fetch('/api/notify', {
           method: 'POST',
@@ -51,8 +64,8 @@ export const services = {
           body: JSON.stringify({
             vendorId: data.vendor_id,
             tokens,
-            title: `Nuevo pedido de ${data.delivery_address || 'un cliente'}`,
-            body: 'Tienes 1 nuevo pedido pendiente. Toca para ver los detalles.',
+            title: `Nuevo pedido de ${buyerName}`,
+            body: `Entregar en: ${buyerAddress}. Toca para ver los detalles.`,
             data: { url: '/dashboard/orders' }
           })
         });

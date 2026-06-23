@@ -3,6 +3,7 @@ self.addEventListener('push', function(event) {
   let title = 'Nueva Notificación';
   let body = '';
   let url = '/';
+  let badgeCount = 1;
 
   if (event.data) {
     try {
@@ -10,6 +11,9 @@ self.addEventListener('push', function(event) {
       title = payload?.data?.title || payload?.notification?.title || title;
       body = payload?.data?.body || payload?.notification?.body || body;
       url = payload?.data?.url || payload?.fcmOptions?.link || url;
+      if (payload?.data?.badge) {
+        badgeCount = parseInt(payload.data.badge, 10) || 1;
+      }
     } catch (e) {
       console.error('[SW] Parse push error', e);
     }
@@ -22,7 +26,28 @@ self.addEventListener('push', function(event) {
     vibrate: [200, 100, 200]
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  // Update badge immediately in background if supported
+  if (navigator && 'setAppBadge' in navigator) {
+    event.waitUntil(
+      navigator.setAppBadge(badgeCount).catch(function(err) {
+        console.warn("Error setting app badge in SW:", err);
+      })
+    );
+  }
+
+  // Prevent duplicate notifications in foreground
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+      const isForeground = clientList.some(function(client) {
+        return client.focused;
+      });
+      if (isForeground) {
+        console.log('[SW] App is in foreground, skipping native notification.');
+        return;
+      }
+      return self.registration.showNotification(title, options);
+    })
+  );
 });
 
 self.addEventListener("notificationclick", function (event) {

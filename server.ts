@@ -52,10 +52,25 @@ async function startServer() {
         return res.status(400).json({ error: "Vendor does not have any registered devices" });
       }
 
+      let badgeCount = 1;
+      if (vendorId) {
+        try {
+          const db = admin.firestore();
+          const ordersSnapshot = await db.collection("orders")
+            .where("vendor_id", "==", vendorId)
+            .where("status", "==", "pending")
+            .get();
+          badgeCount = ordersSnapshot.size;
+        } catch (dbErr) {
+          console.error("Error fetching order count from firestore:", dbErr);
+        }
+      }
+
       const stringifiedData: Record<string, string> = {
         title: title || "Nueva Notificación",
         body: body || "",
-        url: data?.url || '/'
+        url: data?.url || '/',
+        badge: String(badgeCount)
       };
       if (data) {
         for (const key of Object.keys(data)) {
@@ -87,7 +102,7 @@ async function startServer() {
           payload: {
             aps: {
               sound: "default",
-              badge: 1,
+              badge: badgeCount,
               "mutable-content": 1,
               "content-available": 1
             }

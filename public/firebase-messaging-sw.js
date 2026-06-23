@@ -49,8 +49,8 @@ self.addEventListener("notificationclick", function (event) {
 });
 
 // 2. Load Firebase SDKs afterwards
-importScripts("https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js");
-importScripts("https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging-compat.js");
+importScripts("/firebase-app-compat.js");
+importScripts("/firebase-messaging-compat.js");
 
 try {
   firebase.initializeApp({

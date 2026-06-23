@@ -55,7 +55,8 @@ export const handler: Handler = async (event, context) => {
       tokens: tokens,
       webpush: {
         headers: {
-          Urgency: "high"
+          Urgency: "high",
+          TTL: "86400"
         },
         notification: {
           title: title || "Nueva Notificación",
@@ -67,11 +68,25 @@ export const handler: Handler = async (event, context) => {
           link: data?.url || '/'
         }
       },
+      android: {
+        priority: "high" as const,
+        ttl: 86400000, // 1 day
+        notification: {
+          sound: "default",
+          clickAction: "FLUTTER_NOTIFICATION_CLICK"
+        }
+      },
       apns: {
+        headers: {
+          "apns-priority": "10",
+          "apns-expiration": String(Math.floor(Date.now() / 1000) + 86400)
+        },
         payload: {
           aps: {
             sound: "default",
-            badge: 1
+            badge: 1,
+            "mutable-content": 1,
+            "content-available": 1
           }
         }
       }

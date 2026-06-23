@@ -30,10 +30,24 @@ export async function requestNotificationPermission(userId?: string) {
       if ('serviceWorker' in navigator) {
         try {
           const registrations = await navigator.serviceWorker.getRegistrations();
-          if (registrations.length === 0) {
-            await navigator.serviceWorker.register('/sw.js');
+          
+          // Unregister any legacy standalone firebase-messaging-sw.js to avoid duplicate push delivery
+          for (const reg of registrations) {
+            if (reg.active && reg.active.scriptURL.includes('firebase-messaging-sw.js')) {
+              console.log("Cleaning up duplicate firebase-messaging-sw registration:", reg.active.scriptURL);
+              await reg.unregister();
+            }
           }
-          registration = await navigator.serviceWorker.ready;
+
+          // Specifically search for sw.js (VitePWA)
+          const remainingRegistrations = await navigator.serviceWorker.getRegistrations();
+          let swReg = remainingRegistrations.find(r => r.active && r.active.scriptURL.includes('sw.js'));
+          
+          if (!swReg) {
+            swReg = await navigator.serviceWorker.register('/sw.js');
+          }
+          
+          registration = swReg;
         } catch (swErr) {
           console.warn("Could not retrieve ready service worker registration", swErr);
         }

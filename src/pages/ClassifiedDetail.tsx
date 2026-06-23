@@ -68,7 +68,7 @@ export default function ClassifiedDetail() {
       classified_id: item.id,
       buyer_id: user.id,
       vendor_id: item.vendor_id,
-      delivery_address: `${user.sector} - Casa/Apto: ${user.house_number || 'N/A'}`,
+      delivery_address: `${user.sector} - Casa: ${user.house_number || 'N/A'}`,
       notes: notes,
       item_snapshot: {
         title: item.title,

@@ -50,12 +50,11 @@ export const services = {
         const tokens = vendorDoc.exists() ? (vendorDoc.data()?.fcm_tokens || []) : [];
         
         let buyerName = 'un vecino';
-        let buyerAddress = data.delivery_address;
+        const buyerAddress = data.delivery_address;
 
         if (buyerDoc.exists()) {
           const bData = buyerDoc.data();
           buyerName = bData.display_name || bData.name || 'un vecino';
-          buyerAddress = `${bData.sector || 'N/A'} - Casa: ${bData.house_number || 'N/A'}`;
         }
         
         await fetch('/api/notify', {

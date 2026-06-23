@@ -131,27 +131,6 @@ export default function FirebaseProvider({ children }: { children: React.ReactNo
                }
             });
 
-            if (hasNewOrders && 'Notification' in window && Notification.permission === 'granted') {
-               try {
-                  if (navigator.serviceWorker && navigator.serviceWorker.ready) {
-                     navigator.serviceWorker.ready.then(registration => {
-                        registration.showNotification(newOrderTitle, {
-                           body: newOrderBody,
-                           icon: '/icon.svg',
-                           tag: 'new-order'
-                        } as any);
-                     });
-                  } else {
-                     new Notification(newOrderTitle, {
-                        body: newOrderBody,
-                        icon: '/icon.svg'
-                     });
-                  }
-               } catch(e) {
-                   console.log("Notification error", e);
-               }
-            }
-
             // We can now safely overwrite all orders without worrying about merging!
             setOrders(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any)));
           },

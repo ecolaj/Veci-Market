@@ -18,7 +18,7 @@ export default defineConfig(({mode}) => {
           skipWaiting: true,
           importScripts: ['/firebase-messaging-sw.js']
         },
-        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg', 'firebase-app-compat.js', 'firebase-messaging-compat.js'],
         manifest: {
           name: 'VeciMarket',
           short_name: 'VeciMarket',

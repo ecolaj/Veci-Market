@@ -31,6 +31,16 @@ if ('serviceWorker' in navigator) {
   });
 
   window.addEventListener('load', () => {
+    // Limpieza de Service Workers duplicados
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (const reg of registrations) {
+        if (reg.active && reg.active.scriptURL.includes('firebase-messaging-sw.js')) {
+          console.log("Cleanup duplicate firebase-messaging-sw registration:", reg.active.scriptURL);
+          reg.unregister();
+        }
+      }
+    }).catch(console.error);
+
     navigator.serviceWorker.ready.then((registration) => {
       // Cuando la PWA vuelve a estar en primer plano, buscamos actualizaciones del código
       document.addEventListener('visibilitychange', () => {

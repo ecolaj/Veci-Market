@@ -48,6 +48,12 @@ function Layout() {
   // Count pending orders for vendor
   const pendingOrders = orders.filter(o => o.vendor_id === user?.id && o.status === 'pending').length;
 
+  useEffect(() => {
+    if (isAuthenticated && user?.id && Notification.permission === 'granted') {
+      requestNotificationPermission(user.id);
+    }
+  }, [isAuthenticated, user?.id]);
+
   // Actualizar el globito de notificación (App Badge API) en el icono de la PWA
   useEffect(() => {
     if (typeof navigator !== 'undefined' && 'setAppBadge' in navigator) {

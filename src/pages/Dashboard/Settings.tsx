@@ -89,9 +89,16 @@ export default function Settings() {
       const tokens = userDoc.exists() ? (userDoc.data()?.fcm_tokens || []) : [];
       
       if (tokens.length === 0) {
-        alert("No se encontraron tokens FCM registrados para tu cuenta en este navegador. Intenta desinstalar/instalar el acceso directo de tu PWA y vuelve a activar las notificaciones para volver a generarlo.");
-        setTestingPush(false);
-        return;
+        // Try to request permission again to ensure tokens are registered
+        await requestNotificationPermission(user.id);
+        const updatedUserDoc = await getDoc(doc(db, 'users', user.id));
+        const updatedTokens = updatedUserDoc.exists() ? (updatedUserDoc.data()?.fcm_tokens || []) : [];
+
+        if (updatedTokens.length === 0) {
+          alert("No se pudieron registrar tokens FCM para tu cuenta en este navegador. Asegúrate de haber aceptado los permisos de notificación.");
+          setTestingPush(false);
+          return;
+        }
       }
       
       const res = await fetch('/api/notify', {

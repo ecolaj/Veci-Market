@@ -21,6 +21,7 @@ export default function ClassifiedDetail() {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showReportSuccessModal, setShowReportSuccessModal] = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [isReporting, setIsReporting] = useState(false);
 
@@ -109,7 +110,7 @@ export default function ClassifiedDetail() {
     
     setIsReporting(false);
     setShowReportModal(false);
-    alert("Reporte enviado a los administradores. ¡Gracias por ayudar a mantener segura la comunidad!");
+    setShowReportSuccessModal(true);
   };
 
   const renderPaymentIcon = (method: PaymentMethod) => {
@@ -447,6 +448,28 @@ export default function ClassifiedDetail() {
           </div>
         </div>
       )}
+      {/* Report Success Modal */}
+      {showReportSuccessModal && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-neutral-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-[32px] p-8 max-w-sm w-full shadow-2xl relative">
+            <div className="flex flex-col items-center text-center">
+              <h3 className="text-2xl font-black text-neutral-800 mb-4">
+                Reporte Enviado
+              </h3>
+              <p className="text-neutral-500 font-medium mb-6 text-sm">
+                Reporte enviado a los administradores. ¡Gracias por ayudar a mantener segura la comunidad!
+              </p>
+              <button 
+                onClick={() => setShowReportSuccessModal(false)}
+                className="w-full py-3.5 px-4 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-2xl transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Report Modal */}
       {showReportModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-neutral-900/40 backdrop-blur-sm animate-in fade-in duration-200">

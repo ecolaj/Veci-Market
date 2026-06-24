@@ -74,6 +74,7 @@ async function startServer() {
       };
       if (data) {
         for (const key of Object.keys(data)) {
+          if (key === 'badge') continue;
           stringifiedData[key] = String(data[key]);
         }
       }

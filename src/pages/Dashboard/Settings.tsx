@@ -95,7 +95,7 @@ export default function Settings() {
         const updatedTokens = updatedUserDoc.exists() ? (updatedUserDoc.data()?.fcm_tokens || []) : [];
 
         if (updatedTokens.length === 0) {
-          alert("No se pudieron registrar tokens FCM para tu cuenta en este navegador. Asegúrate de haber aceptado los permisos de notificación.");
+          alert("Para recibir notificaciones, asegúrate de haber instalado la aplicación como acceso directo en tu pantalla de inicio y haber aceptado los permisos de notificación. Por favor, revisa la configuración de notificaciones de tu dispositivo.");
           setTestingPush(false);
           return;
         }

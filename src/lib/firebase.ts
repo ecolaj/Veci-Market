@@ -23,26 +23,35 @@ try {
 
 export async function requestNotificationPermission(userId?: string) {
   if (!messaging) return null;
+  console.log("Requesting notification permission, current permission:", Notification.permission);
   try {
     const permission = await Notification.requestPermission();
+    console.log("Permission result:", permission);
     if (permission === 'granted') {
-      let registration: ServiceWorkerRegistration | undefined;
       if ('serviceWorker' in navigator) {
         try {
-          // Unregister any existing service workers to ensure a fresh, consistent state for iOS Web Push
+          // Check if already registered
           const registrations = await navigator.serviceWorker.getRegistrations();
-          for (const reg of registrations) {
-            await reg.unregister();
+          let registration = registrations.find(r => r.active && r.active.scriptURL.includes('firebase-messaging-sw.js'));
+          
+          if (!registration) {
+            console.log("No active firebase-messaging-sw.js found, unregistering all and re-registering.");
+            for (const reg of registrations) {
+              await reg.unregister();
+            }
+            registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+          } else {
+             console.log("Using existing firebase-messaging-sw.js registration.");
           }
-
-          // Register the Firebase Messaging Service Worker
-          const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
           
           // Use this specific registration to get the FCM token
+          console.log("Attempting to get FCM token...");
           const currentToken = await getToken(messaging, { 
             serviceWorkerRegistration: registration,
             vapidKey: (import.meta as any).env.VITE_FIREBASE_VAPID_KEY || undefined
           });
+          
+          console.log("FCM Token retrieved:", currentToken ? "Success" : "Null/Failure");
           
           if (currentToken) {
             if (userId) {

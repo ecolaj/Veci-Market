@@ -31,23 +31,35 @@ export async function requestNotificationPermission(userId?: string) {
         try {
           const registrations = await navigator.serviceWorker.getRegistrations();
           
-          // Unregister any legacy standalone firebase-messaging-sw.js to avoid duplicate push delivery
-          for (const reg of registrations) {
-            if (reg.active && reg.active.scriptURL.includes('firebase-messaging-sw.js')) {
-              console.log("Cleaning up duplicate firebase-messaging-sw registration:", reg.active.scriptURL);
-              await reg.unregister();
-            }
-          }
+          // Check for existing firebase-messaging-sw.js registration
+          const legacyReg = registrations.find(r => r.active && r.active.scriptURL.includes('firebase-messaging-sw.js'));
+          
+          if (legacyReg) {
+            console.log("Using existing firebase-messaging-sw registration");
+            registration = legacyReg;
+          } else {
+            // Unregister any legacy standalone firebase-messaging-sw.js to avoid duplicate push delivery
+            // for (const reg of registrations) {
+            //   if (reg.active && reg.active.scriptURL.includes('firebase-messaging-sw.js')) {
+            //     console.log("Cleaning up duplicate firebase-messaging-sw registration:", reg.active.scriptURL);
+            //     await reg.unregister();
+            //   }
+            // }
 
-          // Specifically search for sw.js (VitePWA)
-          const remainingRegistrations = await navigator.serviceWorker.getRegistrations();
-          let swReg = remainingRegistrations.find(r => r.active && r.active.scriptURL.includes('sw.js'));
-          
-          if (!swReg) {
-            swReg = await navigator.serviceWorker.register('/sw.js');
+            // Specifically search for sw.js (VitePWA)
+            const remainingRegistrations = await navigator.serviceWorker.getRegistrations();
+            let swReg = remainingRegistrations.find(r => r.active && r.active.scriptURL.includes('sw.js'));
+            
+            if (!swReg) {
+              try {
+                swReg = await navigator.serviceWorker.register('/sw.js');
+              } catch (e) {
+                console.warn("Could not register sw.js, trying firebase-messaging-sw.js", e);
+                swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+              }
+            }
+            registration = swReg;
           }
-          
-          registration = swReg;
         } catch (swErr) {
           console.warn("Could not retrieve ready service worker registration", swErr);
         }
